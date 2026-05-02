@@ -3,25 +3,27 @@ package pt.achman.mem
 import pt.achman.interfaces.RepositoryUserGames
 import pt.achman.usergame.UserGame
 
-class RepositoryUserGamesMem: RepositoryUserGames {
+class RepositoryUserGamesMem : RepositoryUserGames {
     private val userGames = mutableListOf<UserGame>()
 
     override fun createUserGame(
         userId: Int,
         gameId: Int,
-        synchronize: Boolean
+        synchronize: Boolean,
     ): UserGame =
         UserGame(
             id = userGames.size + 1,
             userId = userId,
             gameId = gameId,
-            synchronize = synchronize
+            synchronize = synchronize,
         ).also { userGames.add(it) }
 
     override fun findByUserId(userId: Int): List<UserGame> = userGames.filter { it.userId == userId }
 
-    override fun findByUserIdAndGameId(userId: Int, gameId: Int): UserGame? =
-        userGames.find { it.userId == userId && it.gameId == gameId }
+    override fun findByUserIdAndGameId(
+        userId: Int,
+        gameId: Int,
+    ): UserGame? = userGames.find { it.userId == userId && it.gameId == gameId }
 
     override fun findById(id: Int): UserGame? = userGames.find { it.id == id }
 

@@ -13,5 +13,5 @@ data class GameProgress(
     val id: Int,
     val userId: Int,
     val gameId: Int,
-    val completedAchievements: List<Int> = emptyList()
+    val completedAchievements: List<Int> = emptyList(),
 )

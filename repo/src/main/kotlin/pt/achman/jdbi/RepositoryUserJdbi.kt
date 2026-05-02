@@ -1,61 +1,220 @@
 package pt.achman.jdbi
 
 import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.kotlin.mapTo
 import pt.achman.interfaces.RepositoryUser
 import pt.achman.token.Token
 import pt.achman.token.TokenValidationInfo
 import pt.achman.user.PasswordValidationInfo
 import pt.achman.user.User
+import java.sql.ResultSet
 import java.time.Instant
 
 class RepositoryUserJdbi(
-    handle: Handle
-): RepositoryUser {
+    private val handle: Handle,
+) : RepositoryUser {
     override fun createUser(
         name: String,
         email: String,
-        passwordValidation: PasswordValidationInfo
+        passwordValidation: PasswordValidationInfo,
     ): User {
-        TODO("Not yet implemented")
+        val id =
+            handle
+                .createUpdate(
+                    """
+            INSERT INTO dbo.users (name, email, password_validation) 
+            VALUES (:name, :email, :password_validation)
+            RETURNING id
+            """,
+                ).bind("name", name)
+                .bind("email", email)
+                .bind("password_validation", passwordValidation.validationInfo)
+                .executeAndReturnGeneratedKeys()
+                .mapTo(Int::class.java)
+                .one()
+
+        return User(id = id, name = name, email = email, passwordValidation = passwordValidation)
     }
 
-    override fun findByEmail(email: String): User? {
-        TODO("Not yet implemented")
+    override fun findByEmail(email: String): User? =
+        handle
+            .createQuery("SELECT * FROM dbo.users WHERE email = :email")
+            .bind("email", email)
+            .map {
+                    rs, _,
+                ->
+                mapRow(rs)
+            }
+            .findOne()
+            .orElse(null)
+
+    override fun getTokenByTokenValidationInfo(tokenValidationInfo: TokenValidationInfo): Pair<User, Token>? =
+        handle
+            .createQuery(
+                """
+                SELECT users.id AS id,
+                       users.name AS name,
+                       users.email AS email,
+                       users.password_validation AS password_validation,
+                       tokens.token_validation AS token_validation,
+                       tokens.created_at AS created_at,
+                       tokens.last_used_at AS last_used_at
+                FROM dbo.Users AS users
+                INNER JOIN dbo.tokens AS tokens
+                ON users.id = tokens.user_id
+                WHERE token_validation = :validation_information
+                """.trimIndent(),
+            ).bind("validation_information", tokenValidationInfo.validationInfo)
+            .mapTo<UserAndTokenModel>()
+            .singleOrNull()
+            ?.userAndToken
+
+    override fun createToken(
+        token: Token,
+        maxTokens: Int,
+    ) {
+        val deletions =
+            handle
+                .createUpdate(
+                    """
+                    DELETE FROM dbo.tokens 
+                    WHERE user_id = :user_id 
+                        AND token_validation IN (
+                            SELECT token_validation FROM dbo.tokens WHERE user_id = :user_id 
+                                ORDER BY last_used_at DESC OFFSET :offset
+                        )
+                    """.trimIndent(),
+                ).bind("user_id", token.userId)
+                .bind("offset", maxTokens - 1)
+                .execute()
+
+        handle
+            .createUpdate(
+                """
+                INSERT INTO dbo.tokens(user_id, token_validation, created_at, last_used_at) 
+                VALUES (:user_id, :token_validation, :created_at, :last_used_at)
+                """.trimIndent(),
+            ).bind("user_id", token.userId)
+            .bind("token_validation", token.tokenValidationInfo.validationInfo)
+            .bind("created_at", token.createdAt.epochSecond)
+            .bind("last_used_at", token.lastUsedAt.epochSecond)
+            .execute()
     }
 
-    override fun getTokenByTokenValidationInfo(tokenValidationInfo: TokenValidationInfo): Pair<User, Token>? {
-        TODO("Not yet implemented")
+    override fun updateTokenLastUsed(
+        token: Token,
+        now: Instant,
+    ) {
+        handle
+            .createUpdate(
+                """
+                UPDATE dbo.tokens
+                SET last_used_at = :last_used_at
+                WHERE token_validation = :validation_information
+                """.trimIndent(),
+            ).bind("last_used_at", now.epochSecond)
+            .bind("validation_information", token.tokenValidationInfo.validationInfo)
+            .execute()
     }
 
-    override fun createToken(token: Token, maxTokens: Int) {
-        TODO("Not yet implemented")
-    }
+    override fun removeTokenByValidationInfo(tokenValidationInfo: TokenValidationInfo): Int =
+        handle
+            .createUpdate(
+                """
+                DELETE FROM dbo.tokens
+                WHERE token_validation = :validation_information
+            """,
+            ).bind("validation_information", tokenValidationInfo.validationInfo)
+            .execute()
 
-    override fun updateTokenLastUsed(token: Token, now: Instant) {
-        TODO("Not yet implemented")
-    }
+    override fun findById(id: Int): User? =
+        handle
+            .createQuery("SELECT * FROM dbo.users WHERE id = :id")
+            .bind("id", id)
+            .map {
+                    rs, _,
+                ->
+                mapRow(rs)
+            }
+            .findOne()
+            .orElse(null)
 
-    override fun removeTokenByValidationInfo(tokenValidationInfo: TokenValidationInfo): Int {
-        TODO("Not yet implemented")
-    }
-
-    override fun findById(id: Int): User? {
-        TODO("Not yet implemented")
-    }
-
-    override fun findAll(): List<User> {
-        TODO("Not yet implemented")
-    }
+    override fun findAll(): List<User> =
+        handle
+            .createQuery("SELECT * FROM dbo.users")
+            .map {
+                    rs, _,
+                ->
+                mapRow(rs)
+            }
+            .list()
 
     override fun save(entity: User) {
-        TODO("Not yet implemented")
+        handle
+            .createUpdate(
+                """
+                UPDATE dbo.users 
+                SET name = :name,
+                    email = :email,
+                    password_validation = :passwordValidation
+                WHERE id = :id
+                """.trimIndent(),
+            )
+            .bind("id", entity.id)
+            .bind("name", entity.name)
+            .bind("email", entity.email)
+            .bind("passwordValidation", entity.passwordValidation.validationInfo)
+            .execute()
     }
 
     override fun deleteById(id: Int) {
-        TODO("Not yet implemented")
+        handle
+            .createUpdate("DELETE FROM dbo.users WHERE id = :id")
+            .bind("id", id)
+            .execute()
     }
 
     override fun clear() {
-        TODO("Not yet implemented")
+        handle.createUpdate("DELETE FROM dbo.tokens").execute()
+        handle.createUpdate("DELETE FROM dbo.users").execute()
+    }
+
+    private data class UserAndTokenModel(
+        val id: Int,
+        val name: String,
+        val email: String,
+        val passwordValidation: String,
+        val tokenValidation: String,
+        val createdAt: Long,
+        val lastUsedAt: Long,
+    ) {
+        val userAndToken: Pair<User, Token>
+            get() =
+                Pair(
+                    User(
+                        id,
+                        name,
+                        email,
+                        PasswordValidationInfo(passwordValidation),
+                    ),
+                    Token(
+                        TokenValidationInfo(tokenValidation),
+                        id,
+                        Instant.ofEpochSecond(createdAt),
+                        Instant.ofEpochSecond(lastUsedAt),
+                    ),
+                )
+    }
+
+    private fun mapRow(rs: ResultSet): User {
+        return User(
+            id = rs.getInt("id"),
+            name = rs.getString("name"),
+            email = rs.getString("email"),
+            passwordValidation =
+                PasswordValidationInfo(
+                    rs.getString("password_validation"),
+                ),
+        )
     }
 }

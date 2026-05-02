@@ -4,13 +4,13 @@ import pt.achman.game.Game
 import pt.achman.game.GameSource
 import pt.achman.interfaces.RepositoryGame
 
-class RepositoryGameMem: RepositoryGame {
+class RepositoryGameMem : RepositoryGame {
     private val games = mutableListOf<Game>()
 
     override fun createGame(
         externalGameId: String,
         name: String,
-        source: GameSource
+        source: GameSource,
     ): Game =
         Game(
             id = games.size + 1,
@@ -21,12 +21,10 @@ class RepositoryGameMem: RepositoryGame {
 
     override fun findByExternalId(
         externalGameId: String,
-        source: GameSource
-    ): Game? =
-        games.find { it.externalGameId == externalGameId && it.source == source }
+        source: GameSource,
+    ): Game? = games.find { it.externalGameId == externalGameId && it.source == source }
 
-    override fun findById(id: Int): Game? =
-        games.find { it.id == id }
+    override fun findById(id: Int): Game? = games.find { it.id == id }
 
     override fun findAll(): List<Game> = games.toList()
 

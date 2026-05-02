@@ -3,43 +3,129 @@ package pt.achman.jdbi
 import org.jdbi.v3.core.Handle
 import pt.achman.interfaces.RepositoryUserGames
 import pt.achman.usergame.UserGame
+import java.sql.ResultSet
 
 class RepositoryUserGamesJdbi(
-    handle: Handle
-): RepositoryUserGames {
+    private val handle: Handle,
+) : RepositoryUserGames {
     override fun createUserGame(
         userId: Int,
         gameId: Int,
-        synchronize: Boolean
+        synchronize: Boolean,
     ): UserGame {
-        TODO("Not yet implemented")
+        val id =
+            handle.createUpdate(
+                """
+                INSERT INTO dbo.user_games(user_id, game_id, synchronize)
+                VALUES (:userId, :gameId, :synchronize)
+                RETURNING id
+                """.trimIndent(),
+            )
+                .bind("userId", userId)
+                .bind("gameId", gameId)
+                .bind("synchronize", synchronize)
+                .executeAndReturnGeneratedKeys()
+                .mapTo(Int::class.java)
+                .one()
+
+        return UserGame(
+            id = id,
+            userId = userId,
+            gameId = gameId,
+            synchronize = synchronize,
+        )
     }
 
     override fun findByUserId(userId: Int): List<UserGame> {
-        TODO("Not yet implemented")
+        return handle.createQuery(
+            """
+            SELECT *
+            FROM dbo.user_games
+            WHERE user_id = :userId
+            """.trimIndent(),
+        )
+            .bind("userId", userId)
+            .map { rs, _ -> mapRowToUserGame(rs) }
+            .toList()
     }
 
-    override fun findByUserIdAndGameId(userId: Int, gameId: Int): UserGame? {
-        TODO("Not yet implemented")
+    override fun findByUserIdAndGameId(
+        userId: Int,
+        gameId: Int,
+    ): UserGame? {
+        return handle.createQuery(
+            """
+            SELECT *
+            FROM dbo.user_games
+            WHERE user_id = :userId AND game_id = :gameId
+            """.trimIndent(),
+        )
+            .bind("userId", userId)
+            .bind("gameId", gameId)
+            .map { rs, _ -> mapRowToUserGame(rs) }
+            .singleOrNull()
     }
 
     override fun findById(id: Int): UserGame? {
-        TODO("Not yet implemented")
+        return handle.createQuery(
+            """
+            SELECT *
+            FROM dbo.user_games
+            WHERE id = :id
+            """.trimIndent(),
+        )
+            .bind("id", id)
+            .map { rs, _ -> mapRowToUserGame(rs) }
+            .singleOrNull()
     }
 
     override fun findAll(): List<UserGame> {
-        TODO("Not yet implemented")
+        return handle.createQuery(
+            """
+            SELECT *
+            FROM dbo.user_games
+            """.trimIndent(),
+        )
+            .map { rs, _ -> mapRowToUserGame(rs) }
+            .toList()
     }
 
     override fun save(entity: UserGame) {
-        TODO("Not yet implemented")
+        handle.createUpdate(
+            """
+            UPDATE dbo.user_games
+            SET user_id = :userId, game_id = :gameId, synchronize = :synchronize
+            WHERE id = :id
+            """.trimIndent(),
+        )
+            .bind("id", entity.id)
+            .bind("userId", entity.userId)
+            .bind("gameId", entity.gameId)
+            .bind("synchronize", entity.synchronize)
+            .execute()
     }
 
     override fun deleteById(id: Int) {
-        TODO("Not yet implemented")
+        handle.createUpdate(
+            """
+            DELETE FROM dbo.user_games
+            WHERE id = :id
+            """.trimIndent(),
+        )
+            .bind("id", id)
+            .execute()
     }
 
     override fun clear() {
-        TODO("Not yet implemented")
+        handle.createUpdate("DELETE FROM dbo.user_games").execute()
+    }
+
+    private fun mapRowToUserGame(rs: ResultSet): UserGame {
+        return UserGame(
+            id = rs.getInt("id"),
+            userId = rs.getInt("user_id"),
+            gameId = rs.getInt("game_id"),
+            synchronize = rs.getBoolean("synchronize"),
+        )
     }
 }

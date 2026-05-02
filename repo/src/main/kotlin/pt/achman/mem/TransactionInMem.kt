@@ -6,6 +6,7 @@ import pt.achman.interfaces.RepositoryGameProgress
 import pt.achman.interfaces.RepositoryUser
 import pt.achman.interfaces.RepositoryUserGames
 import pt.achman.interfaces.Transaction
+
 class TransactionInMem(
     override val repoUsers: RepositoryUser,
     override val repoGames: RepositoryGame,

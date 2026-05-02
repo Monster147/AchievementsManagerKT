@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import pt.achman.interfaces.RepositoryUserGames
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class RepositoryUserGamesMemTest {
     private lateinit var repo: RepositoryUserGames

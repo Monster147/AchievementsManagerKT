@@ -3,55 +3,166 @@ package pt.achman.jdbi
 import org.jdbi.v3.core.Handle
 import pt.achman.achievement.GameProgress
 import pt.achman.interfaces.RepositoryGameProgress
+import java.sql.ResultSet
 
 class RepositoryGameProgressJdbi(
-    handle: Handle
-): RepositoryGameProgress {
-    override fun createGameProgress(userId: Int, gameId: Int): GameProgress {
-        TODO("Not yet implemented")
+    private val handle: Handle,
+) : RepositoryGameProgress {
+    override fun createGameProgress(
+        userId: Int,
+        gameId: Int,
+    ): GameProgress {
+        val id =
+            handle.createUpdate(
+                """
+                INSERT INTO dbo.game_progress(user_id, game_id, completed_achievements)
+                VALUES (:userId, :gameId, :completedAchievements)
+                RETURNING id
+                """.trimIndent(),
+            )
+                .bind("userId", userId)
+                .bind("gameId", gameId)
+                .bind("completedAchievements", emptyArray<Int>())
+                .executeAndReturnGeneratedKeys()
+                .mapTo(Int::class.java)
+                .one()
+
+        return GameProgress(
+            id = id,
+            userId = userId,
+            gameId = gameId,
+            completedAchievements = emptyList(),
+        )
     }
 
-    override fun findByUserIdAndGameId(userId: Int, gameId: Int): GameProgress? {
-        TODO("Not yet implemented")
+    override fun findByUserIdAndGameId(
+        userId: Int,
+        gameId: Int,
+    ): GameProgress? {
+        return handle.createQuery(
+            """
+            SELECT *
+            FROM dbo.game_progress
+            WHERE user_id = :userId AND game_id = :gameId
+            """.trimIndent(),
+        )
+            .bind("userId", userId)
+            .bind("gameId", gameId)
+            .map { rs, _ -> mapRowToGameProgress(rs) }
+            .singleOrNull()
     }
 
     override fun findByUserId(userId: Int): List<GameProgress> {
-        TODO("Not yet implemented")
+        return handle.createQuery(
+            """
+            SELECT *
+            FROM dbo.game_progress
+            WHERE user_id = :userId
+            """.trimIndent(),
+        )
+            .bind("userId", userId)
+            .map { rs, _ -> mapRowToGameProgress(rs) }
+            .toList()
     }
 
     override fun addCompletedAchievement(
         userId: Int,
         gameId: Int,
-        achievementId: Int
+        achievementId: Int,
     ): GameProgress {
-        TODO("Not yet implemented")
+        val progress = findByUserIdAndGameId(userId, gameId) ?: createGameProgress(userId, gameId)
+        if (!progress.completedAchievements.contains(achievementId)) {
+            val updated =
+                progress.copy(
+                    completedAchievements = progress.completedAchievements + achievementId,
+                )
+            save(updated)
+            return updated
+        }
+        return progress
     }
 
     override fun removeCompletedAchievement(
         userId: Int,
         gameId: Int,
-        achievementId: Int
+        achievementId: Int,
     ): GameProgress {
-        TODO("Not yet implemented")
+        val progress = findByUserIdAndGameId(userId, gameId) ?: createGameProgress(userId, gameId)
+        if (progress.completedAchievements.contains(achievementId)) {
+            val updated =
+                progress.copy(
+                    completedAchievements = progress.completedAchievements - achievementId,
+                )
+            save(updated)
+            return updated
+        }
+        return progress
     }
 
     override fun findById(id: Int): GameProgress? {
-        TODO("Not yet implemented")
+        return handle.createQuery(
+            """
+            SELECT *
+            FROM dbo.game_progress
+            WHERE id = :id
+            """.trimIndent(),
+        )
+            .bind("id", id)
+            .map { rs, _ -> mapRowToGameProgress(rs) }
+            .singleOrNull()
     }
 
     override fun findAll(): List<GameProgress> {
-        TODO("Not yet implemented")
+        return handle.createQuery(
+            """
+            SELECT *
+            FROM dbo.game_progress
+            """.trimIndent(),
+        )
+            .map { rs, _ -> mapRowToGameProgress(rs) }
+            .toList()
     }
 
     override fun save(entity: GameProgress) {
-        TODO("Not yet implemented")
+        handle.createUpdate(
+            """
+            UPDATE dbo.game_progress
+            SET user_id = :userId, game_id = :gameId, completed_achievements = :completedAchievements
+            WHERE id = :id
+            """.trimIndent(),
+        )
+            .bind("id", entity.id)
+            .bind("userId", entity.userId)
+            .bind("gameId", entity.gameId)
+            .bind("completedAchievements", entity.completedAchievements.toTypedArray())
+            .execute()
     }
 
     override fun deleteById(id: Int) {
-        TODO("Not yet implemented")
+        handle.createUpdate(
+            """
+            DELETE FROM dbo.game_progress
+            WHERE id = :id
+            """.trimIndent(),
+        )
+            .bind("id", id)
+            .execute()
     }
 
     override fun clear() {
-        TODO("Not yet implemented")
+        handle.createUpdate("DELETE FROM dbo.game_progress").execute()
+    }
+
+    private fun mapRowToGameProgress(rs: ResultSet): GameProgress {
+        val completedAchievements =
+            rs.getArray("completed_achievements")?.let { arr ->
+                (arr.array as Array<*>).map { (it as Number).toInt() }
+            } ?: emptyList()
+        return GameProgress(
+            id = rs.getInt("id"),
+            gameId = rs.getInt("game_id"),
+            userId = rs.getInt("user_id"),
+            completedAchievements = completedAchievements,
+        )
     }
 }

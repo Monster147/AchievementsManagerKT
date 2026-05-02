@@ -6,6 +6,6 @@ services:
     environment:
       - POSTGRES_DB=db
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=iselDaw
+      - POSTGRES_PASSWORD=projectAchManager
     ports:
       - "5432:5432"

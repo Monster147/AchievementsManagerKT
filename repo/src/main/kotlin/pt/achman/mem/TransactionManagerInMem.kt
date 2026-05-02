@@ -18,6 +18,6 @@ class TransactionManagerInMem : TransactionManager {
                 repoUserGames,
                 repoAchievements,
                 repoGameProgress,
-            )
+            ),
         )
 }

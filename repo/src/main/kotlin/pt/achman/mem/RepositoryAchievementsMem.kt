@@ -3,7 +3,7 @@ package pt.achman.mem
 import pt.achman.achievement.Achievement
 import pt.achman.interfaces.RepositoryAchievements
 
-class RepositoryAchievementsMem: RepositoryAchievements {
+class RepositoryAchievementsMem : RepositoryAchievements {
     private val achievements = mutableListOf<Achievement>()
 
     override fun createAchievement(
@@ -11,7 +11,7 @@ class RepositoryAchievementsMem: RepositoryAchievements {
         name: String,
         icon: String,
         description: String,
-        gameId: Int
+        gameId: Int,
     ): Achievement =
         Achievement(
             id = achievements.size + 1,
@@ -20,19 +20,15 @@ class RepositoryAchievementsMem: RepositoryAchievements {
             gameId = gameId,
             apiName = apiName,
             icon = icon,
-        ).also{ achievements.add(it) }
+        ).also { achievements.add(it) }
 
-    override fun findByGameId(gameId: Int): List<Achievement> =
-        achievements.filter { it.gameId == gameId }
+    override fun findByGameId(gameId: Int): List<Achievement> = achievements.filter { it.gameId == gameId }
 
-    override fun findByApiName(apiName: String): Achievement? =
-        achievements.find { it.apiName == apiName }
+    override fun findByApiName(apiName: String): Achievement? = achievements.find { it.apiName == apiName }
 
-    override fun findById(id: Int): Achievement? =
-        achievements.find { it.id == id }
+    override fun findById(id: Int): Achievement? = achievements.find { it.id == id }
 
-    override fun findAll(): List<Achievement> =
-        achievements.toList()
+    override fun findAll(): List<Achievement> = achievements.toList()
 
     override fun save(entity: Achievement) {
         achievements.removeIf { it.id == entity.id }

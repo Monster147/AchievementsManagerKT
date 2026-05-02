@@ -1,3 +1,6 @@
+DROP SCHEMA IF EXISTS dbo CASCADE;
+CREATE SCHEMA IF NOT EXISTS dbo;
+
 CREATE TABLE dbo.users (
     id          SERIAL                  PRIMARY KEY,
     name        VARCHAR(255)            NOT NULL,
