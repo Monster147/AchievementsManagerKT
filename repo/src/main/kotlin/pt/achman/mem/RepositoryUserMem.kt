@@ -5,6 +5,7 @@ import pt.achman.token.Token
 import pt.achman.token.TokenValidationInfo
 import pt.achman.user.PasswordValidationInfo
 import pt.achman.user.User
+import pt.achman.user.UserRole
 import java.time.Instant
 
 class RepositoryUserMem : RepositoryUser {
@@ -15,6 +16,7 @@ class RepositoryUserMem : RepositoryUser {
                 "Admin",
                 "admin@gmail.com",
                 PasswordValidationInfo("\$2a\$10\$Qocu8dzhoaDmwTRMtJCvfuW4HD9RLBTWZ.pGYLlxvmmF/k2BfmX1C"),
+                role = UserRole.ADMIN,
             ),
         )
     private val tokens = mutableListOf<Token>()
@@ -23,12 +25,21 @@ class RepositoryUserMem : RepositoryUser {
         name: String,
         email: String,
         passwordValidation: PasswordValidationInfo,
+        role: UserRole
     ): User =
-        User(users.size + 1, name, email, passwordValidation).also {
+        User(users.size + 1, name, email, passwordValidation, role).also {
             users.add(it)
         }
 
     override fun findByEmail(email: String): User? = users.find { it.email == email }
+
+    override fun findByRole(role: UserRole): List<User> = users.filter { it.role == role }
+
+    override fun updateRole(user: User, role: UserRole): User {
+        val updatedUser = user.copy(role = role)
+        save(updatedUser)
+        return updatedUser
+    }
 
     override fun getTokenByTokenValidationInfo(tokenValidationInfo: TokenValidationInfo): Pair<User, Token>? =
         tokens.firstOrNull { it.tokenValidationInfo == tokenValidationInfo }?.let {

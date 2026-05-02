@@ -7,6 +7,7 @@ import org.postgresql.ds.PGSimpleDataSource
 import pt.achman.token.Token
 import pt.achman.token.TokenValidationInfo
 import pt.achman.user.PasswordValidationInfo
+import pt.achman.user.UserRole
 import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -35,7 +36,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `createUser returns user with correct fields`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             assertEquals("Alice", user.name)
             assertEquals("alice@gmail.com", user.email)
             assertEquals(PasswordValidationInfo("hash"), user.passwordValidation)
@@ -43,9 +44,17 @@ class RepositoryUserJdbiTest {
     }
 
     @Test
+    fun `createUser with ADMIN role`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.ADMIN)
+            assertEquals(UserRole.ADMIN, user.role)
+        }
+    }
+
+    @Test
     fun `createUser persists to findById`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             val found = repoUsers.findById(user.id)
             assertNotNull(found)
             assertEquals(user.id, found.id)
@@ -57,8 +66,8 @@ class RepositoryUserJdbiTest {
     @Test
     fun `createUser persists to findAll`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"))
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
             val all = repoUsers.findAll()
             assertEquals(2, all.size)
             assertTrue(all.any { it.id == u1.id })
@@ -83,7 +92,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `findByEmail returns correct user`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             val found = repoUsers.findByEmail("alice@gmail.com")
             assertNotNull(found)
             assertEquals(user.id, found.id)
@@ -100,7 +109,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `findByEmail is case sensitive`() {
         trxManager.run {
-            repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             assertNull(repoUsers.findByEmail("Alice@gmail.com"))
             assertNull(repoUsers.findByEmail("ALICE@GMAIL.COM"))
         }
@@ -114,9 +123,79 @@ class RepositoryUserJdbiTest {
     }
 
     @Test
+    fun `findByRole returns correct users`() {
+        trxManager.run {
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.ADMIN)
+            val u3 = repoUsers.createUser("Carol", "carol@gmail.com", PasswordValidationInfo("hash3"), UserRole.NORMAL)
+            val normals = repoUsers.findByRole(UserRole.NORMAL)
+            val admins = repoUsers.findByRole(UserRole.ADMIN)
+            assertEquals(2, normals.size)
+            assertTrue(normals.any { it.id == u1.id })
+            assertTrue(normals.any { it.id == u3.id })
+            assertEquals(1, admins.size)
+            assertTrue(admins.any { it.id == u2.id })
+        }
+    }
+
+    @Test
+    fun `findByRole returns empty when no users with that role`() {
+        trxManager.run {
+            repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            assertEquals(emptyList(), repoUsers.findByRole(UserRole.ADMIN))
+        }
+    }
+
+    @Test
+    fun `findByRole returns empty on empty repo`() {
+        trxManager.run {
+            assertEquals(emptyList(), repoUsers.findByRole(UserRole.NORMAL))
+            assertEquals(emptyList(), repoUsers.findByRole(UserRole.ADMIN))
+        }
+    }
+
+    @Test
+    fun `updateRole changes user role`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val updated = repoUsers.updateRole(user, UserRole.ADMIN)
+            assertEquals(UserRole.ADMIN, updated.role)
+        }
+    }
+
+    @Test
+    fun `updateRole persists changes`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            repoUsers.updateRole(user, UserRole.ADMIN)
+            assertEquals(UserRole.ADMIN, repoUsers.findById(user.id)?.role)
+        }
+    }
+
+    @Test
+    fun `updateRole does not affect other users`() {
+        trxManager.run {
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+            repoUsers.updateRole(u1, UserRole.ADMIN)
+            assertEquals(UserRole.NORMAL, repoUsers.findById(u2.id)?.role)
+        }
+    }
+
+    @Test
+    fun `updateRole with same role does nothing`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val updated = repoUsers.updateRole(user, UserRole.NORMAL)
+            assertEquals(UserRole.NORMAL, updated.role)
+            assertEquals(UserRole.NORMAL, repoUsers.findById(user.id)?.role)
+        }
+    }
+
+    @Test
     fun `save updates existing user`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             val updated = user.copy(name = "AliceUpdated", email = "updated@gmail.com")
             repoUsers.save(updated)
             val found = repoUsers.findById(user.id)
@@ -128,7 +207,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `save updates password validation`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("oldhash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("oldhash"), UserRole.NORMAL)
             val updated = user.copy(passwordValidation = PasswordValidationInfo("newhash"))
             repoUsers.save(updated)
             val found = repoUsers.findById(user.id)
@@ -139,7 +218,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `save does not duplicate user`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             repoUsers.save(user.copy(name = "Updated"))
             assertEquals(1, repoUsers.findAll().size)
         }
@@ -148,7 +227,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `deleteById removes user`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             repoUsers.deleteById(user.id)
             assertNull(repoUsers.findById(user.id))
         }
@@ -157,8 +236,8 @@ class RepositoryUserJdbiTest {
     @Test
     fun `deleteById only removes the correct user`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"))
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
             repoUsers.deleteById(u1.id)
             assertNull(repoUsers.findById(u1.id))
             assertNotNull(repoUsers.findById(u2.id))
@@ -168,7 +247,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `deleteById on nonexistent id does nothing`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             repoUsers.deleteById(999)
             assertNotNull(repoUsers.findById(user.id))
         }
@@ -177,7 +256,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `createToken and getTokenByTokenValidationInfo`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             val info = TokenValidationInfo("token123")
             val now = Instant.now()
             val token = Token(info, user.id, now, now)
@@ -192,7 +271,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `createToken removes oldest when maxTokens exceeded`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             val init = Instant.now().minusSeconds(60)
             val t1 = Token(TokenValidationInfo("t1"), user.id, init, Instant.now().minusSeconds(10))
             val t2 = Token(TokenValidationInfo("t2"), user.id, init, Instant.now().minusSeconds(5))
@@ -209,8 +288,8 @@ class RepositoryUserJdbiTest {
     @Test
     fun `createToken does not remove tokens of other users`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"))
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
             val init = Instant.now().minusSeconds(60)
             val t1 = Token(TokenValidationInfo("t1"), u1.id, init, Instant.now().minusSeconds(10))
             val t2 = Token(TokenValidationInfo("t2"), u1.id, init, Instant.now().minusSeconds(5))
@@ -227,7 +306,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `updateTokenLastUsed updates the timestamp`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             val info = TokenValidationInfo("tokenAlice")
             val init = Instant.now().minusSeconds(200)
             val oldToken = Token(info, user.id, init, Instant.now().minusSeconds(100))
@@ -244,7 +323,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `removeTokenByValidationInfo removes token and returns count`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             val info = TokenValidationInfo("tokenAlice")
             val now = Instant.now()
             repoUsers.createToken(Token(info, user.id, now, now), maxTokens = 2)
@@ -264,7 +343,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `removeTokenByValidationInfo only removes the correct token`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             val info1 = TokenValidationInfo("token1")
             val info2 = TokenValidationInfo("token2")
             val now = Instant.now()
@@ -279,7 +358,7 @@ class RepositoryUserJdbiTest {
     @Test
     fun `clear removes all users and tokens`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
             val info = TokenValidationInfo("tokenAlice")
             val now = Instant.now()
             repoUsers.createToken(Token(info, user.id, now, now), maxTokens = 2)

@@ -7,6 +7,7 @@ import pt.achman.token.Token
 import pt.achman.token.TokenValidationInfo
 import pt.achman.user.PasswordValidationInfo
 import pt.achman.user.User
+import pt.achman.user.UserRole
 import java.sql.ResultSet
 import java.time.Instant
 
@@ -17,23 +18,25 @@ class RepositoryUserJdbi(
         name: String,
         email: String,
         passwordValidation: PasswordValidationInfo,
+        role: UserRole,
     ): User {
         val id =
             handle
                 .createUpdate(
                     """
-            INSERT INTO dbo.users (name, email, password_validation) 
-            VALUES (:name, :email, :password_validation)
+            INSERT INTO dbo.users (name, email, password_validation, role) 
+            VALUES (:name, :email, :password_validation, :role)
             RETURNING id
             """,
                 ).bind("name", name)
                 .bind("email", email)
                 .bind("password_validation", passwordValidation.validationInfo)
+                .bind("role", role.name)
                 .executeAndReturnGeneratedKeys()
                 .mapTo(Int::class.java)
                 .one()
 
-        return User(id = id, name = name, email = email, passwordValidation = passwordValidation)
+        return User(id = id, name = name, email = email, passwordValidation = passwordValidation, role = role)
     }
 
     override fun findByEmail(email: String): User? =
@@ -48,6 +51,18 @@ class RepositoryUserJdbi(
             .findOne()
             .orElse(null)
 
+    override fun findByRole(role: UserRole): List<User> =
+        handle.createQuery("SELECT * FROM dbo.users WHERE role = :role")
+            .bind("role", role.name)
+            .map { rs, _ -> mapRow(rs) }
+            .toList()
+
+    override fun updateRole(user: User, role: UserRole): User {
+        val updated = user.copy(role = role)
+        save(updated)
+        return updated
+    }
+
     override fun getTokenByTokenValidationInfo(tokenValidationInfo: TokenValidationInfo): Pair<User, Token>? =
         handle
             .createQuery(
@@ -56,6 +71,7 @@ class RepositoryUserJdbi(
                        users.name AS name,
                        users.email AS email,
                        users.password_validation AS password_validation,
+                       users.role AS role,
                        tokens.token_validation AS token_validation,
                        tokens.created_at AS created_at,
                        tokens.last_used_at AS last_used_at
@@ -156,7 +172,8 @@ class RepositoryUserJdbi(
                 UPDATE dbo.users 
                 SET name = :name,
                     email = :email,
-                    password_validation = :passwordValidation
+                    password_validation = :passwordValidation,
+                    role = :role
                 WHERE id = :id
                 """.trimIndent(),
             )
@@ -164,6 +181,7 @@ class RepositoryUserJdbi(
             .bind("name", entity.name)
             .bind("email", entity.email)
             .bind("passwordValidation", entity.passwordValidation.validationInfo)
+            .bind("role", entity.role.name)
             .execute()
     }
 
@@ -184,6 +202,7 @@ class RepositoryUserJdbi(
         val name: String,
         val email: String,
         val passwordValidation: String,
+        val role: UserRole,
         val tokenValidation: String,
         val createdAt: Long,
         val lastUsedAt: Long,
@@ -196,6 +215,7 @@ class RepositoryUserJdbi(
                         name,
                         email,
                         PasswordValidationInfo(passwordValidation),
+                        role,
                     ),
                     Token(
                         TokenValidationInfo(tokenValidation),
@@ -215,6 +235,7 @@ class RepositoryUserJdbi(
                 PasswordValidationInfo(
                     rs.getString("password_validation"),
                 ),
+            role = UserRole.valueOf(rs.getString("role")),
         )
     }
 }

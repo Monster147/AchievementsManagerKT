@@ -6,6 +6,7 @@ import pt.achman.interfaces.RepositoryUser
 import pt.achman.token.Token
 import pt.achman.token.TokenValidationInfo
 import pt.achman.user.PasswordValidationInfo
+import pt.achman.user.UserRole
 import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -21,16 +22,22 @@ class RepositoryUserMemTest {
 
     @Test
     fun `createUser returns user with correct fields`() {
-        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
         assertEquals("Alice", user.name)
         assertEquals("alice@gmail.com", user.email)
         assertEquals(PasswordValidationInfo("hash"), user.passwordValidation)
     }
 
     @Test
+    fun `createUser with ADMIN role`() {
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.ADMIN)
+        assertEquals(UserRole.ADMIN, user.role)
+    }
+
+    @Test
     fun `createUser assigns sequential ids`() {
-        val user1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
-        val user2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"))
+        val user1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+        val user2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
         // admin is seeded with id 1, so new users start at 2
         assertEquals(2, user1.id)
         assertEquals(3, user2.id)
@@ -39,8 +46,8 @@ class RepositoryUserMemTest {
     @Test
     fun `createUser persists to findAll`() {
         val admin = repo.findById(1)
-        val user1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
-        val user2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"))
+        val user1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+        val user2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
         assertEquals(listOf(admin, user1, user2), repo.findAll())
     }
 
@@ -51,7 +58,7 @@ class RepositoryUserMemTest {
 
     @Test
     fun `findById returns correct user`() {
-        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
         assertEquals(user, repo.findById(user.id))
     }
 
@@ -62,7 +69,7 @@ class RepositoryUserMemTest {
 
     @Test
     fun `findByEmail returns correct user`() {
-        val user = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"))
+        val user = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
         assertEquals(user, repo.findByEmail("bob@gmail.com"))
     }
 
@@ -73,7 +80,7 @@ class RepositoryUserMemTest {
 
     @Test
     fun `findByEmail is case sensitive`() {
-        repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+        repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
         assertNull(repo.findByEmail("Alice@gmail.com"))
         assertNull(repo.findByEmail("ALICE@GMAIL.COM"))
     }
@@ -93,14 +100,70 @@ class RepositoryUserMemTest {
     @Test
     fun `findAll returns all users`() {
         val admin = repo.findById(1)
-        val user1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
-        val user2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"))
+        val user1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+        val user2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
         assertEquals(listOf(admin, user1, user2), repo.findAll())
     }
 
     @Test
+    fun `findByRole returns seeded admin when searching ADMIN`() {
+        val admins = repo.findByRole(UserRole.ADMIN)
+        assertEquals(1, admins.size)
+        assertEquals(1, admins.first().id)
+    }
+
+    @Test
+    fun `findByRole returns correct users`() {
+        val u1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+        val u2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.ADMIN)
+        val u3 = repo.createUser("Carol", "carol@gmail.com", PasswordValidationInfo("hash3"), UserRole.NORMAL)
+        val normals = repo.findByRole(UserRole.NORMAL)
+        val admins = repo.findByRole(UserRole.ADMIN)
+        assertEquals(listOf(u1, u3), normals)
+        // seeded admin + u2
+        assertEquals(2, admins.size)
+        assert(admins.any { it.id == u2.id })
+    }
+
+    @Test
+    fun `findByRole returns empty when no users with that role`() {
+        // fresh repo only has seeded admin, no NORMAL users
+        assertEquals(emptyList(), repo.findByRole(UserRole.NORMAL))
+    }
+
+    @Test
+    fun `updateRole changes user role`() {
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+        val updated = repo.updateRole(user, UserRole.ADMIN)
+        assertEquals(UserRole.ADMIN, updated.role)
+    }
+
+    @Test
+    fun `updateRole persists changes`() {
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+        repo.updateRole(user, UserRole.ADMIN)
+        assertEquals(UserRole.ADMIN, repo.findById(user.id)?.role)
+    }
+
+    @Test
+    fun `updateRole does not affect other users`() {
+        val u1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+        val u2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+        repo.updateRole(u1, UserRole.ADMIN)
+        assertEquals(UserRole.NORMAL, repo.findById(u2.id)?.role)
+    }
+
+    @Test
+    fun `updateRole with same role does nothing`() {
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+        val updated = repo.updateRole(user, UserRole.NORMAL)
+        assertEquals(UserRole.NORMAL, updated.role)
+        assertEquals(UserRole.NORMAL, repo.findById(user.id)?.role)
+    }
+
+    @Test
     fun `save updates existing user`() {
-        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
         val updated = user.copy(name = "AliceUpdated", email = "updated@gmail.com")
         repo.save(updated)
         assertEquals(updated, repo.findById(user.id))
@@ -108,7 +171,7 @@ class RepositoryUserMemTest {
 
     @Test
     fun `save does not duplicate user`() {
-        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
         repo.save(user.copy(name = "Updated"))
         // admin + alice = 2
         assertEquals(2, repo.findAll().size)
@@ -116,14 +179,14 @@ class RepositoryUserMemTest {
 
     @Test
     fun `deleteById removes user`() {
-        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
         repo.deleteById(user.id)
         assertNull(repo.findById(user.id))
     }
 
     @Test
     fun `deleteById also removes user tokens`() {
-        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
         val info = TokenValidationInfo("tokenAlice")
         repo.createToken(Token(info, user.id, Instant.now(), Instant.now()), maxTokens = 2)
         repo.deleteById(user.id)
@@ -132,8 +195,8 @@ class RepositoryUserMemTest {
 
     @Test
     fun `deleteById only removes the correct user`() {
-        val user1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
-        val user2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"))
+        val user1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+        val user2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
         repo.deleteById(user1.id)
         assertNull(repo.findById(user1.id))
         assertEquals(user2, repo.findById(user2.id))
@@ -141,14 +204,14 @@ class RepositoryUserMemTest {
 
     @Test
     fun `deleteById on nonexistent id does nothing`() {
-        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
         repo.deleteById(999)
         assertEquals(user, repo.findById(user.id))
     }
 
     @Test
     fun `createToken and getTokenByTokenValidationInfo`() {
-        val user = repo.createUser("Carol", "carol@gmail.com", PasswordValidationInfo("hash3"))
+        val user = repo.createUser("Carol", "carol@gmail.com", PasswordValidationInfo("hash3"), UserRole.NORMAL)
         val info = TokenValidationInfo("token123")
         val now = Instant.now()
         val token = Token(info, user.id, now, now)
@@ -161,7 +224,7 @@ class RepositoryUserMemTest {
 
     @Test
     fun `createToken removes oldest when maxTokens exceeded`() {
-        val user = repo.createUser("Dave", "dave@gmail.com", PasswordValidationInfo("hash4"))
+        val user = repo.createUser("Dave", "dave@gmail.com", PasswordValidationInfo("hash4"), UserRole.NORMAL)
         val init = Instant.now().minusSeconds(60)
         val t1 = Token(TokenValidationInfo("t1"), user.id, init, Instant.now().minusSeconds(10))
         val t2 = Token(TokenValidationInfo("t2"), user.id, init, Instant.now().minusSeconds(5))
@@ -176,8 +239,8 @@ class RepositoryUserMemTest {
 
     @Test
     fun `createToken does not remove tokens of other users`() {
-        val user1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
-        val user2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"))
+        val user1 = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+        val user2 = repo.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
         val init = Instant.now().minusSeconds(60)
         val t1 = Token(TokenValidationInfo("t1"), user1.id, init, Instant.now().minusSeconds(10))
         val t2 = Token(TokenValidationInfo("t2"), user1.id, init, Instant.now().minusSeconds(5))
@@ -193,7 +256,7 @@ class RepositoryUserMemTest {
 
     @Test
     fun `updateTokenLastUsed replaces token`() {
-        val user = repo.createUser("Eve", "eve@gmail.com", PasswordValidationInfo("hash5"))
+        val user = repo.createUser("Eve", "eve@gmail.com", PasswordValidationInfo("hash5"), UserRole.NORMAL)
         val info = TokenValidationInfo("tokenEve")
         val init = Instant.now().minusSeconds(200)
         val oldToken = Token(info, user.id, init, Instant.now().minusSeconds(100))
@@ -207,7 +270,7 @@ class RepositoryUserMemTest {
 
     @Test
     fun `updateTokenLastUsed does not create a duplicate token`() {
-        val user = repo.createUser("Eve", "eve@gmail.com", PasswordValidationInfo("hash5"))
+        val user = repo.createUser("Eve", "eve@gmail.com", PasswordValidationInfo("hash5"), UserRole.NORMAL)
         val info = TokenValidationInfo("tokenEve")
         val now = Instant.now()
         val token = Token(info, user.id, now, now)
@@ -223,7 +286,7 @@ class RepositoryUserMemTest {
 
     @Test
     fun `removeTokenByValidationInfo removes token and returns count`() {
-        val user = repo.createUser("Frank", "frank@gmail.com", PasswordValidationInfo("hash6"))
+        val user = repo.createUser("Frank", "frank@gmail.com", PasswordValidationInfo("hash6"), UserRole.NORMAL)
         val info = TokenValidationInfo("tokenFrank")
         repo.createToken(Token(info, user.id, Instant.now(), Instant.now()), maxTokens = 2)
         val removed = repo.removeTokenByValidationInfo(info)
@@ -238,7 +301,7 @@ class RepositoryUserMemTest {
 
     @Test
     fun `removeTokenByValidationInfo only removes the correct token`() {
-        val user = repo.createUser("Frank", "frank@gmail.com", PasswordValidationInfo("hash6"))
+        val user = repo.createUser("Frank", "frank@gmail.com", PasswordValidationInfo("hash6"), UserRole.NORMAL)
         val info1 = TokenValidationInfo("token1")
         val info2 = TokenValidationInfo("token2")
         val now = Instant.now()
@@ -251,7 +314,7 @@ class RepositoryUserMemTest {
 
     @Test
     fun `clear removes all users and tokens`() {
-        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"))
+        val user = repo.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
         val info = TokenValidationInfo("tokenAlice")
         repo.createToken(Token(info, user.id, Instant.now(), Instant.now()), maxTokens = 2)
         repo.clear()

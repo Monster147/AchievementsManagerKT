@@ -2,18 +2,19 @@ DROP SCHEMA IF EXISTS dbo CASCADE;
 CREATE SCHEMA IF NOT EXISTS dbo;
 
 CREATE TABLE dbo.users (
-    id          SERIAL                  PRIMARY KEY,
-    name        VARCHAR(255)            NOT NULL,
-    email       VARCHAR(255)            NOT NULL UNIQUE,
-    password_validation VARCHAR(255)    NOT NULL
+    id                  SERIAL                  PRIMARY KEY,
+    name                VARCHAR(255)            NOT NULL,
+    email               VARCHAR(255)            NOT NULL UNIQUE,
+    password_validation VARCHAR(255)            NOT NULL,
+    role                VARCHAR(50)             NOT NULL DEFAULT 'NORMAL'
 );
 
 create table dbo.tokens
 (
-    token_validation VARCHAR(256) primary key,
-    user_id          int references dbo.users (id),
-    created_at       bigint not null,
-    last_used_at     bigint not null
+    token_validation    VARCHAR(256)    primary key,
+    user_id             int             references dbo.users (id),
+    created_at          bigint          not null,
+    last_used_at        bigint          not null
 );
 
 CREATE TABLE dbo.games (

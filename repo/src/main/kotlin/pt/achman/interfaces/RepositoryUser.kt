@@ -4,6 +4,7 @@ import pt.achman.token.Token
 import pt.achman.token.TokenValidationInfo
 import pt.achman.user.PasswordValidationInfo
 import pt.achman.user.User
+import pt.achman.user.UserRole
 import java.time.Instant
 
 /**
@@ -23,6 +24,7 @@ interface RepositoryUser : Repository<User> {
         name: String,
         email: String,
         passwordValidation: PasswordValidationInfo,
+        role: UserRole
     ): User
 
     /**
@@ -33,6 +35,25 @@ interface RepositoryUser : Repository<User> {
      * @return [User] correspondente, ou null caso não exista.
      */
     fun findByEmail(email: String): User?
+
+    /**
+     * Procura utilizadores pela sua role.
+     *
+     * @param role Role a pesquisar
+     *
+     * @return Lista de [User]s correspondentes à role, ou lista vazia caso não existam.
+     */
+    fun findByRole(role: UserRole): List<User>
+
+    /**
+     * Atualiza a role do utilizador.
+     *
+     * @param user Utilizador a atualizar a role
+     * @param role Role para atualizar
+     *
+     * @return [User] com a role atualizada
+     */
+    fun updateRole(user: User, role: UserRole): User
 
     /**
      * Obtém o utilizador associado a um token válido.

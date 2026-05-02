@@ -10,6 +10,7 @@ package pt.achman.user
  * @property name Nome do utilizador.
  * @property email Endereço de email do utilizador (tipicamente único no sistema).
  * @property passwordValidation Informação associada à validação da password.
+ * @property role Papel associado ao utilizador
  *
  * @constructor Cria uma instância de [User] com os dados fornecidos.
  */
@@ -18,4 +19,5 @@ data class User(
     val name: String,
     val email: String,
     val passwordValidation: PasswordValidationInfo,
+    val role: UserRole,
 )
