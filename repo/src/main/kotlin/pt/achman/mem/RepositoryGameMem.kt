@@ -1,6 +1,8 @@
 package pt.achman.mem
 
 import pt.achman.game.Game
+import pt.achman.game.GameGenre
+import pt.achman.game.GamePlatform
 import pt.achman.game.GameSource
 import pt.achman.interfaces.RepositoryGame
 
@@ -23,6 +25,30 @@ class RepositoryGameMem : RepositoryGame {
         externalGameId: String,
         source: GameSource,
     ): Game? = games.find { it.externalGameId == externalGameId && it.source == source }
+
+    override fun updateGameInfo(
+        game: Game,
+        externalGameId: String?,
+        name: String?,
+        genres: List<GameGenre>?,
+        platform: GamePlatform?,
+        releaseYear: String?,
+        source: GameSource?,
+        cover: String?,
+    ): Game {
+        val updatedGame =
+            game.copy(
+                externalGameId = externalGameId ?: game.externalGameId,
+                name = name ?: game.name,
+                genre = genres ?: game.genre,
+                platform = platform ?: game.platform,
+                releaseYear = releaseYear ?: game.releaseYear,
+                source = source ?: game.source,
+                cover = cover ?: game.cover,
+            )
+        save(updatedGame)
+        return updatedGame
+    }
 
     override fun findById(id: Int): Game? = games.find { it.id == id }
 

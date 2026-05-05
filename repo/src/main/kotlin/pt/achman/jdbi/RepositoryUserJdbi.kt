@@ -57,7 +57,10 @@ class RepositoryUserJdbi(
             .map { rs, _ -> mapRow(rs) }
             .toList()
 
-    override fun updateRole(user: User, role: UserRole): User {
+    override fun updateRole(
+        user: User,
+        role: UserRole,
+    ): User {
         val updated = user.copy(role = role)
         save(updated)
         return updated

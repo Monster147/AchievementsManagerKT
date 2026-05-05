@@ -103,6 +103,25 @@ class RepositoryAchievementsMemTest {
     }
 
     @Test
+    fun `removeAchievements removes all achievements for a game`() {
+        repo.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", 1)
+        repo.createAchievement("api2", "Achievement 2", "icon2.png", "Desc 2", 1)
+        repo.createAchievement("api3", "Achievement 3", "icon3.png", "Desc 3", 2)
+        repo.removeAchievements(1)
+        assertEquals(emptyList(), repo.findByGameId(1))
+        assertEquals(listOf(repo.findById(3)), repo.findByGameId(2))
+    }
+
+    @Test
+    fun `removeAchievements on game with no achievements does nothing`() {
+        repo.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", 1)
+        assertEquals(emptyList(), repo.findByGameId(999))
+        repo.removeAchievements(999)
+        assertEquals(emptyList(), repo.findByGameId(999))
+        assertEquals(listOf(repo.findById(1)), repo.findByGameId(1))
+    }
+
+    @Test
     fun `findAll returns empty on empty repo`() {
         assertEquals(emptyList(), repo.findAll())
     }

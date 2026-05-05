@@ -25,7 +25,7 @@ class RepositoryUserMem : RepositoryUser {
         name: String,
         email: String,
         passwordValidation: PasswordValidationInfo,
-        role: UserRole
+        role: UserRole,
     ): User =
         User(users.size + 1, name, email, passwordValidation, role).also {
             users.add(it)
@@ -35,7 +35,10 @@ class RepositoryUserMem : RepositoryUser {
 
     override fun findByRole(role: UserRole): List<User> = users.filter { it.role == role }
 
-    override fun updateRole(user: User, role: UserRole): User {
+    override fun updateRole(
+        user: User,
+        role: UserRole,
+    ): User {
         val updatedUser = user.copy(role = role)
         save(updatedUser)
         return updatedUser

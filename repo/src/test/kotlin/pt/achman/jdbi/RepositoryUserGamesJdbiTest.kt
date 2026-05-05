@@ -144,6 +144,98 @@ class RepositoryUserGamesJdbiTest {
     }
 
     @Test
+    fun `alterSyncOption toggles synchronize from false to true`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+
+            val userGame = repoUserGames.createUserGame(user.id, game.id, false)
+
+            val updated = repoUserGames.alterSyncOption(userGame)
+
+            assertEquals(true, updated.synchronize)
+        }
+    }
+
+    @Test
+    fun `alterSyncOption toggles synchronize from true to false`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+
+            val userGame = repoUserGames.createUserGame(user.id, game.id, true)
+
+            val updated = repoUserGames.alterSyncOption(userGame)
+
+            assertEquals(false, updated.synchronize)
+        }
+    }
+
+    @Test
+    fun `alterSyncOption persists change`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+
+            val userGame = repoUserGames.createUserGame(user.id, game.id, false)
+
+            repoUserGames.alterSyncOption(userGame)
+
+            val found = repoUserGames.findById(userGame.id)
+            assertEquals(true, found?.synchronize)
+        }
+    }
+
+    @Test
+    fun `alterSyncOption does not duplicate userGame`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+
+            val userGame = repoUserGames.createUserGame(user.id, game.id, false)
+
+            repoUserGames.alterSyncOption(userGame)
+
+            assertEquals(1, repoUserGames.findAll().size)
+        }
+    }
+
+    @Test
+    fun `alterSyncOption only affects the correct userGame`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM)
+
+            val ug1 = repoUserGames.createUserGame(user.id, g1.id, false)
+            val ug2 = repoUserGames.createUserGame(user.id, g2.id, false)
+
+            repoUserGames.alterSyncOption(ug1)
+
+            val updated1 = repoUserGames.findById(ug1.id)
+            val updated2 = repoUserGames.findById(ug2.id)
+
+            assertEquals(true, updated1?.synchronize)
+            assertEquals(false, updated2?.synchronize)
+        }
+    }
+
+    @Test
+    fun `alterSyncOption toggling twice returns to original value`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+
+            val userGame = repoUserGames.createUserGame(user.id, game.id, false)
+
+            val updated1 = repoUserGames.alterSyncOption(userGame)
+            val updated2 = repoUserGames.alterSyncOption(updated1)
+
+            assertEquals(false, updated2.synchronize)
+        }
+    }
+
+    @Test
     fun `save updates synchronize flag`() {
         trxManager.run {
             val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)

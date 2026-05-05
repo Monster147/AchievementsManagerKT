@@ -285,6 +285,92 @@ class RepositoryGameProgressJdbiTest {
     }
 
     @Test
+    fun `clearCompletedAchievements removes all achievements`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val a1 = repoAchievements.createAchievement("api1", "A1", "icon1.png", "Desc", game.id)
+            val a2 = repoAchievements.createAchievement("api2", "A2", "icon2.png", "Desc", game.id)
+
+            repoGameProgress.createGameProgress(user.id, game.id)
+            repoGameProgress.addCompletedAchievement(user.id, game.id, a1.id)
+            repoGameProgress.addCompletedAchievement(user.id, game.id, a2.id)
+
+            val updated = repoGameProgress.clearCompletedAchievements(user.id, game.id)
+
+            assertNotNull(updated)
+            assertTrue(updated.completedAchievements.isEmpty())
+        }
+    }
+
+    @Test
+    fun `clearCompletedAchievements persists changes`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val achievement = repoAchievements.createAchievement("api1", "A1", "icon.png", "Desc", game.id)
+
+            repoGameProgress.createGameProgress(user.id, game.id)
+            repoGameProgress.addCompletedAchievement(user.id, game.id, achievement.id)
+
+            repoGameProgress.clearCompletedAchievements(user.id, game.id)
+
+            val found = repoGameProgress.findByUserIdAndGameId(user.id, game.id)
+            assertNotNull(found)
+            assertTrue(found.completedAchievements.isEmpty())
+        }
+    }
+
+    @Test
+    fun `clearCompletedAchievements does not affect other users`() {
+        trxManager.run {
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val achievement = repoAchievements.createAchievement("api1", "A1", "icon.png", "Desc", game.id)
+
+            repoGameProgress.createGameProgress(u1.id, game.id)
+            repoGameProgress.createGameProgress(u2.id, game.id)
+
+            repoGameProgress.addCompletedAchievement(u1.id, game.id, achievement.id)
+            repoGameProgress.addCompletedAchievement(u2.id, game.id, achievement.id)
+
+            repoGameProgress.clearCompletedAchievements(u1.id, game.id)
+
+            val u2Progress = repoGameProgress.findByUserIdAndGameId(u2.id, game.id)
+            assertNotNull(u2Progress)
+            assertTrue(u2Progress.completedAchievements.contains(achievement.id))
+        }
+    }
+
+    @Test
+    fun `clearCompletedAchievements returns null when progress does not exist`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+
+            val result = repoGameProgress.clearCompletedAchievements(user.id, game.id)
+
+            assertNull(result)
+        }
+    }
+
+    @Test
+    fun `clearCompletedAchievements on empty achievements keeps empty`() {
+        trxManager.run {
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+
+            repoGameProgress.createGameProgress(user.id, game.id)
+
+            val updated = repoGameProgress.clearCompletedAchievements(user.id, game.id)
+
+            assertNotNull(updated)
+            assertTrue(updated.completedAchievements.isEmpty())
+        }
+    }
+
+    @Test
     fun `deleteById removes progress`() {
         trxManager.run {
             val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)

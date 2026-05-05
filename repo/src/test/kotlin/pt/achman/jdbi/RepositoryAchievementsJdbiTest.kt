@@ -4,6 +4,8 @@ import org.jdbi.v3.core.Jdbi
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.postgresql.ds.PGSimpleDataSource
+import pt.achman.game.GameGenre
+import pt.achman.game.GamePlatform
 import pt.achman.game.GameSource
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -152,6 +154,143 @@ class RepositoryAchievementsJdbiTest {
             repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", game.id)
             assertNull(repoAchievements.findByApiName("api"))
             assertNull(repoAchievements.findByApiName("api11"))
+        }
+    }
+
+    @Test
+    fun `removeAchievements removes all achievements for a game`() {
+        trxManager.run {
+            val game1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game2 = repoGames.createGame("3072", "Ratchet & Clank 2", GameSource.RETROACHIEVEMENTS)
+            repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", game1.id)
+            repoAchievements.createAchievement("api2", "Achievement 2", "icon2.png", "Desc 2", game1.id)
+            val achievement = repoAchievements.createAchievement("api3", "Achievement 3", "icon3.png", "Desc 3", game2.id)
+            repoAchievements.removeAchievements(game1.id)
+            assertTrue(repoAchievements.findByGameId(game1.id).isEmpty())
+            assertEquals(listOf(repoAchievements.findById(achievement.id)), repoAchievements.findByGameId(game2.id))
+        }
+    }
+
+    @Test
+    fun `removeAchievements on game with no achievements does nothing`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val achievement = repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", game.id)
+            assertTrue(repoAchievements.findByGameId(999).isEmpty())
+            repoAchievements.removeAchievements(999)
+            assertTrue(repoAchievements.findByGameId(999).isEmpty())
+            assertEquals(listOf(repoAchievements.findById(achievement.id)), repoAchievements.findByGameId(game.id))
+        }
+    }
+
+    @Test
+    fun `updateGameInfo updates all fields in database`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+
+            val updated =
+                repoGames.updateGameInfo(
+                    game = game,
+                    externalGameId = "9999",
+                    name = "New Name",
+                    genres = listOf(GameGenre.ACTION),
+                    platform = GamePlatform.PC,
+                    releaseYear = "2024",
+                    source = GameSource.STEAM,
+                    cover = "cover.jpg",
+                )
+
+            val fromDb = repoGames.findById(game.id)
+
+            assertEquals(updated, fromDb)
+        }
+    }
+
+    @Test
+    fun `updateGameInfo keeps old values when null is passed`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+
+            val updated =
+                repoGames.updateGameInfo(
+                    game = game,
+                    externalGameId = null,
+                    name = null,
+                    genres = null,
+                    platform = null,
+                    releaseYear = null,
+                    source = null,
+                    cover = null,
+                )
+
+            val fromDb = repoGames.findById(game.id)
+
+            assertEquals(updated, fromDb)
+        }
+    }
+
+    @Test
+    fun `updateGameInfo persists changes`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+
+            repoGames.updateGameInfo(
+                game = game,
+                externalGameId = null,
+                name = "Updated Name",
+                genres = null,
+                platform = null,
+                releaseYear = null,
+                source = null,
+                cover = null,
+            )
+
+            val fromDb = repoGames.findById(game.id)
+
+            assertEquals("Updated Name", fromDb?.name)
+        }
+    }
+
+    @Test
+    fun `updateGameInfo does not create new row`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+
+            repoGames.updateGameInfo(
+                game = game,
+                externalGameId = "999",
+                name = "Updated",
+                genres = null,
+                platform = null,
+                releaseYear = null,
+                source = null,
+                cover = null,
+            )
+
+            val all = repoGames.findAll()
+            assertEquals(1, all.size)
+        }
+    }
+
+    @Test
+    fun `updateGameInfo updates genres array correctly`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+
+            repoGames.updateGameInfo(
+                game = game,
+                externalGameId = null,
+                name = null,
+                genres = listOf(GameGenre.ACTION, GameGenre.ADVENTURE),
+                platform = null,
+                releaseYear = null,
+                source = null,
+                cover = null,
+            )
+
+            val fromDb = repoGames.findById(game.id)
+
+            assertEquals(listOf(GameGenre.ACTION, GameGenre.ADVENTURE), fromDb?.genre)
         }
     }
 

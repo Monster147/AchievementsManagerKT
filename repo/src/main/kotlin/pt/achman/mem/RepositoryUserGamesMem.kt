@@ -25,6 +25,12 @@ class RepositoryUserGamesMem : RepositoryUserGames {
         gameId: Int,
     ): UserGame? = userGames.find { it.userId == userId && it.gameId == gameId }
 
+    override fun alterSyncOption(userGame: UserGame): UserGame {
+        val updatedUserGame = userGame.copy(synchronize = !userGame.synchronize)
+        save(updatedUserGame)
+        return updatedUserGame
+    }
+
     override fun findById(id: Int): UserGame? = userGames.find { it.id == id }
 
     override fun findAll(): List<UserGame> = userGames.toList()

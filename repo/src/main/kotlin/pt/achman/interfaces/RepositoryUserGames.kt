@@ -15,4 +15,6 @@ interface RepositoryUserGames : Repository<UserGame> {
         userId: Int,
         gameId: Int,
     ): UserGame?
+
+    fun alterSyncOption(userGame: UserGame): UserGame
 }

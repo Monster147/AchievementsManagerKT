@@ -26,4 +26,9 @@ interface RepositoryGameProgress : Repository<GameProgress> {
         gameId: Int,
         achievementId: Int,
     ): GameProgress
+
+    fun clearCompletedAchievements(
+        userId: Int,
+        gameId: Int,
+    ): GameProgress?
 }

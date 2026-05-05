@@ -42,6 +42,61 @@ class RepositoryGameProgressMemTest {
     }
 
     @Test
+    fun `clearCompletedAchievements removes all achievements`() {
+        repo.createGameProgress(userId = 1, gameId = 1)
+        repo.addCompletedAchievement(1, 1, 10)
+        repo.addCompletedAchievement(1, 1, 20)
+
+        val updated = repo.clearCompletedAchievements(1, 1)
+
+        assertNotNull(updated)
+        assertTrue(updated.completedAchievements.isEmpty())
+    }
+
+    @Test
+    fun `clearCompletedAchievements persists changes`() {
+        repo.createGameProgress(userId = 1, gameId = 1)
+        repo.addCompletedAchievement(1, 1, 10)
+
+        repo.clearCompletedAchievements(1, 1)
+
+        val found = repo.findByUserIdAndGameId(1, 1)
+        assertNotNull(found)
+        assertTrue(found.completedAchievements.isEmpty())
+    }
+
+    @Test
+    fun `clearCompletedAchievements does not affect other users`() {
+        repo.createGameProgress(userId = 1, gameId = 1)
+        repo.createGameProgress(userId = 2, gameId = 1)
+
+        repo.addCompletedAchievement(1, 1, 10)
+        repo.addCompletedAchievement(2, 1, 20)
+
+        repo.clearCompletedAchievements(1, 1)
+
+        val user2 = repo.findByUserIdAndGameId(2, 1)
+        assertNotNull(user2)
+        assertTrue(user2.completedAchievements.contains(20))
+    }
+
+    @Test
+    fun `clearCompletedAchievements returns null when progress does not exist`() {
+        val result = repo.clearCompletedAchievements(1, 1)
+        assertNull(result)
+    }
+
+    @Test
+    fun `clearCompletedAchievements on empty achievements keeps empty`() {
+        repo.createGameProgress(userId = 1, gameId = 1)
+
+        val updated = repo.clearCompletedAchievements(1, 1)
+
+        assertNotNull(updated)
+        assertTrue(updated.completedAchievements.isEmpty())
+    }
+
+    @Test
     fun `findById returns correct progress`() {
         val progress = repo.createGameProgress(userId = 1, gameId = 1)
         assertEquals(progress, repo.findById(progress.id))

@@ -24,7 +24,7 @@ interface RepositoryUser : Repository<User> {
         name: String,
         email: String,
         passwordValidation: PasswordValidationInfo,
-        role: UserRole
+        role: UserRole,
     ): User
 
     /**
@@ -53,7 +53,10 @@ interface RepositoryUser : Repository<User> {
      *
      * @return [User] com a role atualizada
      */
-    fun updateRole(user: User, role: UserRole): User
+    fun updateRole(
+        user: User,
+        role: UserRole,
+    ): User
 
     /**
      * Obtém o utilizador associado a um token válido.

@@ -99,6 +99,19 @@ class RepositoryGameProgressJdbi(
         return progress
     }
 
+    override fun clearCompletedAchievements(
+        userId: Int,
+        gameId: Int,
+    ): GameProgress? {
+        val progress = findByUserIdAndGameId(userId, gameId) ?: return null
+        val updated =
+            progress.copy(
+                completedAchievements = emptyList(),
+            )
+        save(updated)
+        return updated
+    }
+
     override fun findById(id: Int): GameProgress? {
         return handle.createQuery(
             """

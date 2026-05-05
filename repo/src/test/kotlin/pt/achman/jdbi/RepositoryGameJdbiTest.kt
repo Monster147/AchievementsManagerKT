@@ -118,6 +118,170 @@ class RepositoryGameJdbiTest {
     }
 
     @Test
+    fun `updateGameInfo updates all fields`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+
+            val updated =
+                repoGames.updateGameInfo(
+                    game = game,
+                    externalGameId = "9999",
+                    name = "New Name",
+                    genres = listOf(GameGenre.ACTION, GameGenre.ADVENTURE),
+                    platform = GamePlatform.PS2,
+                    releaseYear = "2002",
+                    source = GameSource.STEAM,
+                    cover = "cover.jpg",
+                )
+
+            assertEquals("9999", updated.externalGameId)
+            assertEquals("New Name", updated.name)
+            assertEquals(listOf(GameGenre.ACTION, GameGenre.ADVENTURE), updated.genre)
+            assertEquals(GamePlatform.PS2, updated.platform)
+            assertEquals("2002", updated.releaseYear)
+            assertEquals(GameSource.STEAM, updated.source)
+            assertEquals("cover.jpg", updated.cover)
+        }
+    }
+
+    @Test
+    fun `updateGameInfo persists changes`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+
+            repoGames.updateGameInfo(
+                game = game,
+                externalGameId = null,
+                name = "Updated Name",
+                genres = null,
+                platform = null,
+                releaseYear = null,
+                source = null,
+                cover = null,
+            )
+
+            val found = repoGames.findById(game.id)
+            assertEquals("Updated Name", found?.name)
+        }
+    }
+
+    @Test
+    fun `updateGameInfo keeps old values when null is passed`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+
+            val updated =
+                repoGames.updateGameInfo(
+                    game = game,
+                    externalGameId = null,
+                    name = null,
+                    genres = null,
+                    platform = null,
+                    releaseYear = null,
+                    source = null,
+                    cover = null,
+                )
+
+            assertEquals(game.externalGameId, updated.externalGameId)
+            assertEquals(game.name, updated.name)
+            assertEquals(game.source, updated.source)
+        }
+    }
+
+    @Test
+    fun `updateGameInfo updates only provided fields`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+
+            val updated =
+                repoGames.updateGameInfo(
+                    game = game,
+                    externalGameId = null,
+                    name = "Updated Name",
+                    genres = null,
+                    platform = null,
+                    releaseYear = null,
+                    source = null,
+                    cover = null,
+                )
+
+            assertEquals("Updated Name", updated.name)
+            assertEquals(game.externalGameId, updated.externalGameId)
+            assertEquals(game.source, updated.source)
+        }
+    }
+
+    @Test
+    fun `updateGameInfo updates genre array correctly`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Game", GameSource.RETROACHIEVEMENTS)
+
+            repoGames.updateGameInfo(
+                game = game,
+                externalGameId = null,
+                name = null,
+                genres = listOf(GameGenre.ACTION, GameGenre.RPG),
+                platform = null,
+                releaseYear = null,
+                source = null,
+                cover = null,
+            )
+
+            val found = repoGames.findById(game.id)
+            assertEquals(listOf(GameGenre.ACTION, GameGenre.RPG), found?.genre)
+        }
+    }
+
+    @Test
+    fun `updateGameInfo does not duplicate game`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+
+            repoGames.updateGameInfo(
+                game = game,
+                externalGameId = "999",
+                name = "Updated",
+                genres = null,
+                platform = null,
+                releaseYear = null,
+                source = null,
+                cover = null,
+            )
+
+            assertEquals(1, repoGames.findAll().size)
+        }
+    }
+
+    @Test
+    fun `updateGameInfo round trip validation`() {
+        trxManager.run {
+            val game = repoGames.createGame("3070", "Old", GameSource.RETROACHIEVEMENTS)
+
+            repoGames.updateGameInfo(
+                game = game,
+                externalGameId = "888",
+                name = "New",
+                genres = listOf(GameGenre.ADVENTURE),
+                platform = GamePlatform.PC,
+                releaseYear = "2020",
+                source = GameSource.STEAM,
+                cover = "cover.png",
+            )
+
+            val found = repoGames.findById(game.id)
+
+            assertNotNull(found)
+            assertEquals("888", found.externalGameId)
+            assertEquals("New", found.name)
+            assertEquals(listOf(GameGenre.ADVENTURE), found.genre)
+            assertEquals(GamePlatform.PC, found.platform)
+            assertEquals("2020", found.releaseYear)
+            assertEquals(GameSource.STEAM, found.source)
+            assertEquals("cover.png", found.cover)
+        }
+    }
+
+    @Test
     fun `findAll returns empty on empty repo`() {
         trxManager.run {
             assertEquals(emptyList(), repoGames.findAll())

@@ -67,6 +67,17 @@ class RepositoryAchievementsJdbi(
             .singleOrNull()
     }
 
+    override fun removeAchievements(gameId: Int) {
+        handle.createUpdate(
+            """
+            DELETE FROM dbo.achievements
+            WHERE game_id = :gameId
+            """.trimIndent(),
+        )
+            .bind("gameId", gameId)
+            .execute()
+    }
+
     override fun findById(id: Int): Achievement? {
         return handle.createQuery(
             """

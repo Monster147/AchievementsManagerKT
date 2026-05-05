@@ -97,6 +97,67 @@ class RepositoryUserGamesMemTest {
     }
 
     @Test
+    fun `alterSyncOption toggles synchronize from false to true`() {
+        val userGame = repo.createUserGame(userId = 1, gameId = 1, synchronize = false)
+
+        val updated = repo.alterSyncOption(userGame)
+
+        assertEquals(true, updated.synchronize)
+    }
+
+    @Test
+    fun `alterSyncOption toggles synchronize from true to false`() {
+        val userGame = repo.createUserGame(userId = 1, gameId = 1, synchronize = true)
+
+        val updated = repo.alterSyncOption(userGame)
+
+        assertEquals(false, updated.synchronize)
+    }
+
+    @Test
+    fun `alterSyncOption persists change`() {
+        val userGame = repo.createUserGame(userId = 1, gameId = 1, synchronize = false)
+
+        repo.alterSyncOption(userGame)
+
+        val found = repo.findById(userGame.id)
+        assertEquals(true, found?.synchronize)
+    }
+
+    @Test
+    fun `alterSyncOption does not duplicate userGame`() {
+        val userGame = repo.createUserGame(userId = 1, gameId = 1, synchronize = false)
+
+        repo.alterSyncOption(userGame)
+
+        assertEquals(1, repo.findAll().size)
+    }
+
+    @Test
+    fun `alterSyncOption only affects the correct userGame`() {
+        val ug1 = repo.createUserGame(userId = 1, gameId = 1, synchronize = false)
+        val ug2 = repo.createUserGame(userId = 2, gameId = 2, synchronize = false)
+
+        repo.alterSyncOption(ug1)
+
+        val updated1 = repo.findById(ug1.id)
+        val updated2 = repo.findById(ug2.id)
+
+        assertEquals(true, updated1?.synchronize)
+        assertEquals(false, updated2?.synchronize)
+    }
+
+    @Test
+    fun `alterSyncOption toggling twice returns to original value`() {
+        val userGame = repo.createUserGame(userId = 1, gameId = 1, synchronize = false)
+
+        val updated1 = repo.alterSyncOption(userGame)
+        val updated2 = repo.alterSyncOption(updated1)
+
+        assertEquals(false, updated2.synchronize)
+    }
+
+    @Test
     fun `save updates synchronize flag`() {
         val userGame = repo.createUserGame(userId = 1, gameId = 1, synchronize = false)
         repo.save(userGame.copy(synchronize = true))

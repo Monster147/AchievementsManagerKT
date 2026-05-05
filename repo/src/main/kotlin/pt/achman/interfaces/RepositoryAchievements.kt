@@ -14,4 +14,6 @@ interface RepositoryAchievements : Repository<Achievement> {
     fun findByGameId(gameId: Int): List<Achievement>
 
     fun findByApiName(apiName: String): Achievement?
+
+    fun removeAchievements(gameId: Int)
 }

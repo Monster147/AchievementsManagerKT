@@ -2,6 +2,7 @@ package pt.achman.mem
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import pt.achman.game.GamePlatform
 import pt.achman.game.GameSource
 import pt.achman.interfaces.RepositoryGame
 import kotlin.test.assertEquals
@@ -84,6 +85,108 @@ class RepositoryGameMemTest {
     @Test
     fun `findByExternalId returns null on empty repo`() {
         assertNull(repo.findByExternalId("3070", GameSource.RETROACHIEVEMENTS))
+    }
+
+    @Test
+    fun `updateGameInfo updates all fields`() {
+        val game = repo.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+
+        val updated =
+            repo.updateGameInfo(
+                game = game,
+                externalGameId = "9999",
+                name = "New Name",
+                genres = emptyList(),
+                platform = GamePlatform.PC,
+                releaseYear = "2024",
+                source = GameSource.STEAM,
+                cover = "cover.jpg",
+            )
+
+        assertEquals("9999", updated.externalGameId)
+        assertEquals("New Name", updated.name)
+        assertEquals(emptyList(), updated.genre)
+        assertEquals(GamePlatform.PC, updated.platform)
+        assertEquals("2024", updated.releaseYear)
+        assertEquals(GameSource.STEAM, updated.source)
+        assertEquals("cover.jpg", updated.cover)
+    }
+
+    @Test
+    fun `updateGameInfo keeps old values when null is passed`() {
+        val game = repo.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+
+        val updated =
+            repo.updateGameInfo(
+                game = game,
+                externalGameId = null,
+                name = null,
+                genres = null,
+                platform = null,
+                releaseYear = null,
+                source = null,
+                cover = null,
+            )
+
+        assertEquals(game, updated)
+    }
+
+    @Test
+    fun `updateGameInfo persists changes in repository`() {
+        val game = repo.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+
+        repo.updateGameInfo(
+            game = game,
+            externalGameId = null,
+            name = "Updated Name",
+            genres = null,
+            platform = null,
+            releaseYear = null,
+            source = null,
+            cover = null,
+        )
+
+        val stored = repo.findById(game.id)
+        assertEquals("Updated Name", stored?.name)
+    }
+
+    @Test
+    fun `updateGameInfo does not duplicate game`() {
+        val game = repo.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+
+        repo.updateGameInfo(
+            game = game,
+            externalGameId = "999",
+            name = "Updated",
+            genres = null,
+            platform = null,
+            releaseYear = null,
+            source = null,
+            cover = null,
+        )
+
+        assertEquals(1, repo.findAll().size)
+    }
+
+    @Test
+    fun `updateGameInfo updates only provided fields`() {
+        val game = repo.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+
+        val updated =
+            repo.updateGameInfo(
+                game = game,
+                externalGameId = null,
+                name = "Updated Name",
+                genres = null,
+                platform = null,
+                releaseYear = null,
+                source = null,
+                cover = null,
+            )
+
+        assertEquals("Updated Name", updated.name)
+        assertEquals(game.externalGameId, updated.externalGameId)
+        assertEquals(game.source, updated.source)
     }
 
     @Test

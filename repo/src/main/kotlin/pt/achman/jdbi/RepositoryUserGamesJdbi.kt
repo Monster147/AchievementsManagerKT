@@ -66,6 +66,12 @@ class RepositoryUserGamesJdbi(
             .singleOrNull()
     }
 
+    override fun alterSyncOption(userGame: UserGame): UserGame {
+        val updatedUserGame = userGame.copy(synchronize = !userGame.synchronize)
+        save(updatedUserGame)
+        return updatedUserGame
+    }
+
     override fun findById(id: Int): UserGame? {
         return handle.createQuery(
             """

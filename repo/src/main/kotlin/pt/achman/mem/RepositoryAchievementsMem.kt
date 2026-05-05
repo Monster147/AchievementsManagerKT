@@ -26,6 +26,10 @@ class RepositoryAchievementsMem : RepositoryAchievements {
 
     override fun findByApiName(apiName: String): Achievement? = achievements.find { it.apiName == apiName }
 
+    override fun removeAchievements(gameId: Int) {
+        achievements.removeIf { it.gameId == gameId }
+    }
+
     override fun findById(id: Int): Achievement? = achievements.find { it.id == id }
 
     override fun findAll(): List<Achievement> = achievements.toList()
