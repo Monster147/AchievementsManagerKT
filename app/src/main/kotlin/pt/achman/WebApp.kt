@@ -8,11 +8,12 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import pt.achman.jdbi.TransactionManagerJdbi
-import pt.achman.jdbi.configureWithAppRequirements
-import pt.achman.mem.TransactionManagerInMem
-import pt.achman.token.Sha256TokenEncoder
-import pt.achman.user.UsersDomainConfig
+import pt.jsal.achman.jdbi.TransactionManagerJdbi
+import pt.jsal.achman.jdbi.configureWithAppRequirements
+import pt.jsal.achman.mem.TransactionManagerInMem
+import pt.jsal.achman.token.Sha256TokenEncoder
+import pt.jsal.achman.user.UsersDomainConfig
+import pt.jsal.achman.jdbi.configureWithAppRequirements
 import java.time.Clock
 import java.time.Duration
 

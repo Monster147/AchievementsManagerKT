@@ -5,8 +5,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
-import pt.achman.interfaces.TransactionManager
-import pt.achman.utils.Either
+import pt.jsal.achman.interfaces.TransactionManager
+import pt.jsal.achman.TokenCreationError
+import pt.jsal.achman.UserError
+import pt.jsal.achman.UserService
+import pt.jsal.achman.utils.Either
 import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

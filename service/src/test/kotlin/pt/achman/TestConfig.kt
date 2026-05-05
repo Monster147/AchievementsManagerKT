@@ -4,14 +4,14 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import pt.achman.mem.TransactionManagerInMem
-import pt.achman.token.Sha256TokenEncoder
-import pt.achman.user.UsersDomainConfig
+import pt.jsal.achman.mem.TransactionManagerInMem
+import pt.jsal.achman.token.Sha256TokenEncoder
+import pt.jsal.achman.user.UsersDomainConfig
 import java.time.Clock
 import java.time.Duration
 
 @Configuration
-@ComponentScan("pt.achman")
+@ComponentScan("pt.jsal.achman")
 class TestConfig {
     @Bean
     fun passwordEncoder() = BCryptPasswordEncoder()

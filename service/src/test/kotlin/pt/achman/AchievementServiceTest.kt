@@ -4,10 +4,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
-import pt.achman.interfaces.TransactionManager
-import pt.achman.user.PasswordValidationInfo
-import pt.achman.user.UserRole
-import pt.achman.utils.Either
+import pt.jsal.achman.interfaces.TransactionManager
+import pt.jsal.achman.user.PasswordValidationInfo
+import pt.jsal.achman.user.UserRole
+import pt.jsal.achman.AchievementError
+import pt.jsal.achman.AchievementService
+import pt.jsal.achman.game.GameSource
+import pt.jsal.achman.utils.Either
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
@@ -45,7 +48,7 @@ class AchievementServiceTest {
             repoGames.createGame(
                 externalGameId = "game-ext-1",
                 name = "Test Game",
-                source = pt.achman.game.GameSource.STEAM,
+                source = GameSource.STEAM,
             )
         }
 
