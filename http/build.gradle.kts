@@ -5,10 +5,6 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api(project(":service"))
 
@@ -26,6 +22,11 @@ dependencies {
 
     // To use SLF4J
     implementation("org.slf4j:slf4j-api:2.0.7")
+
+    // To use RetroAchievements
+    implementation("com.github.RetroAchievements:api-kotlin:2.0.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.7.3")
 }
 
 kotlin {

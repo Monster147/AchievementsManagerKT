@@ -6,5 +6,5 @@ interface TransactionManager {
      * inicializar uma ligação JDBC, um Handle do JDBI, ou outro recurso,
      * que é depois passado como argumento ao construtor de Transaction.
      */
-    fun <R> run(block: pt.jsal.achman.interfaces.Transaction.() -> R): R
+    fun <R> run(block: Transaction.() -> R): R
 }

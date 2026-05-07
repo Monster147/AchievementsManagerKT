@@ -18,7 +18,7 @@ import pt.jsal.achman.utils.Failure
 import pt.jsal.achman.utils.Success
 
 @RestController
-@RequestMapping("/games")
+@RequestMapping("/api/games")
 class GameController(
     private val gameService: GameService,
 ) {

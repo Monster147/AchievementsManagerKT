@@ -9,10 +9,6 @@ plugins {
 group = "pt.achman"
 version = "0.1.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api(project(":http"))
 

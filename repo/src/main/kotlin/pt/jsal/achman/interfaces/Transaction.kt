@@ -14,5 +14,7 @@ interface Transaction {
     val repoAchievements: RepositoryAchievements
     val repoGameProgress: RepositoryGameProgress
 
+    val repoConfig: RepositoryIntegrationConfig
+
     fun rollback()
 }

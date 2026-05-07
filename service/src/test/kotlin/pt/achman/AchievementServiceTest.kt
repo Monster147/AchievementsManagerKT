@@ -49,7 +49,7 @@ class AchievementServiceTest {
                 externalGameId = "game-ext-1",
                 name = "Test Game",
                 source = GameSource.STEAM,
-                cover = "cover.png"
+                cover = "cover.png",
             )
         }
 

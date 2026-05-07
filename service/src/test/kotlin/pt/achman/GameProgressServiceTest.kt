@@ -49,7 +49,7 @@ class GameProgressServiceTest {
                 externalGameId = "g1",
                 name = "Game",
                 source = GameSource.STEAM,
-                cover = "cover.png"
+                cover = "cover.png",
             ).id
         }
 

@@ -4,10 +4,6 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation("org.springframework:spring-webmvc:6.2.11")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.19.2")

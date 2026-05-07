@@ -3,6 +3,7 @@ package pt.jsal.achman.mem
 import pt.jsal.achman.interfaces.RepositoryAchievements
 import pt.jsal.achman.interfaces.RepositoryGame
 import pt.jsal.achman.interfaces.RepositoryGameProgress
+import pt.jsal.achman.interfaces.RepositoryIntegrationConfig
 import pt.jsal.achman.interfaces.RepositoryUser
 import pt.jsal.achman.interfaces.RepositoryUserGames
 import pt.jsal.achman.interfaces.Transaction
@@ -13,6 +14,7 @@ class TransactionInMem(
     override val repoUserGames: RepositoryUserGames,
     override val repoAchievements: RepositoryAchievements,
     override val repoGameProgress: RepositoryGameProgress,
+    override val repoConfig: RepositoryIntegrationConfig
 ) : Transaction {
     override fun rollback(): Unit = throw UnsupportedOperationException()
 }

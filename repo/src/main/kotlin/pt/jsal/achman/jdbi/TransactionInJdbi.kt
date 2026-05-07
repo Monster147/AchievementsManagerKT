@@ -1,6 +1,9 @@
 package pt.jsal.achman.jdbi
 
 import org.jdbi.v3.core.Handle
+import pt.jsal.achman.common.RepositoryIntegrationsConfigFile
+import pt.jsal.achman.config.IntegrationsConfig
+import pt.jsal.achman.interfaces.RepositoryIntegrationConfig
 import pt.jsal.achman.interfaces.Transaction
 
 class TransactionInJdbi(
@@ -11,6 +14,7 @@ class TransactionInJdbi(
     override val repoUserGames = RepositoryUserGamesJdbi(handle)
     override val repoAchievements = RepositoryAchievementsJdbi(handle)
     override val repoGameProgress = RepositoryGameProgressJdbi(handle)
+    override val repoConfig = RepositoryIntegrationsConfigFile()
 
     override fun rollback() {
         handle.rollback()
