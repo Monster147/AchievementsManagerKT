@@ -5,6 +5,7 @@ import pt.jsal.achman.interfaces.RepositoryAchievements
 
 class RepositoryAchievementsMem : RepositoryAchievements {
     private val achievements = mutableListOf<Achievement>()
+    private var nextId = 1
 
     override fun createAchievement(
         apiName: String,
@@ -14,7 +15,7 @@ class RepositoryAchievementsMem : RepositoryAchievements {
         gameId: Int,
     ): Achievement =
         Achievement(
-            id = achievements.size + 1,
+            id = nextId++,
             name = name,
             description = description,
             gameId = gameId,

@@ -5,13 +5,14 @@ import pt.jsal.achman.interfaces.RepositoryGameProgress
 
 class RepositoryGameProgressMem : RepositoryGameProgress {
     private val progresses = mutableListOf<GameProgress>()
+    private var nextId = 1
 
     override fun createGameProgress(
         userId: Int,
         gameId: Int,
     ): GameProgress =
         GameProgress(
-            progresses.size + 1,
+            nextId++,
             userId,
             gameId,
         ).also {
@@ -70,6 +71,10 @@ class RepositoryGameProgressMem : RepositoryGameProgress {
             )
         save(updated)
         return updated
+    }
+
+    override fun removeUserProgress(userId: Int) {
+        progresses.removeIf { it.userId == userId }
     }
 
     override fun findById(id: Int): GameProgress? = progresses.find { it.id == id }

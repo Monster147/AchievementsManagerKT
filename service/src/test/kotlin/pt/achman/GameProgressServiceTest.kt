@@ -4,12 +4,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
+import pt.jsal.achman.GameProgressError
+import pt.jsal.achman.GameProgressService
 import pt.jsal.achman.game.GameSource
 import pt.jsal.achman.interfaces.TransactionManager
 import pt.jsal.achman.user.PasswordValidationInfo
 import pt.jsal.achman.user.UserRole
-import pt.jsal.achman.GameProgressError
-import pt.jsal.achman.GameProgressService
 import pt.jsal.achman.utils.Either
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -49,6 +49,7 @@ class GameProgressServiceTest {
                 externalGameId = "g1",
                 name = "Game",
                 source = GameSource.STEAM,
+                cover = "cover.png"
             ).id
         }
 

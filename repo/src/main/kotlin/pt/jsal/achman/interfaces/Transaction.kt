@@ -8,11 +8,11 @@ package pt.jsal.achman.interfaces
  * instâncias necessárias de repositórios no seu construtor.
  */
 interface Transaction {
-    val repoUsers: pt.jsal.achman.interfaces.RepositoryUser
-    val repoGames: pt.jsal.achman.interfaces.RepositoryGame
-    val repoUserGames: pt.jsal.achman.interfaces.RepositoryUserGames
-    val repoAchievements: pt.jsal.achman.interfaces.RepositoryAchievements
-    val repoGameProgress: pt.jsal.achman.interfaces.RepositoryGameProgress
+    val repoUsers: RepositoryUser
+    val repoGames: RepositoryGame
+    val repoUserGames: RepositoryUserGames
+    val repoAchievements: RepositoryAchievements
+    val repoGameProgress: RepositoryGameProgress
 
     fun rollback()
 }

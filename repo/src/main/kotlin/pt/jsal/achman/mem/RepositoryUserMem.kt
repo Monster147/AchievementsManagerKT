@@ -20,6 +20,7 @@ class RepositoryUserMem : RepositoryUser {
             ),
         )
     private val tokens = mutableListOf<Token>()
+    private var nextId = 2
 
     override fun createUser(
         name: String,
@@ -27,7 +28,7 @@ class RepositoryUserMem : RepositoryUser {
         passwordValidation: PasswordValidationInfo,
         role: UserRole,
     ): User =
-        User(users.size + 1, name, email, passwordValidation, role).also {
+        User(nextId++, name, email, passwordValidation, role).also {
             users.add(it)
         }
 

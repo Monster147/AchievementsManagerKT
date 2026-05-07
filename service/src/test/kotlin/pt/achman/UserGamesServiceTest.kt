@@ -4,12 +4,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
+import pt.jsal.achman.UserGamesError
+import pt.jsal.achman.UserGamesService
 import pt.jsal.achman.game.GameSource
 import pt.jsal.achman.interfaces.TransactionManager
 import pt.jsal.achman.user.PasswordValidationInfo
 import pt.jsal.achman.user.UserRole
-import pt.jsal.achman.UserGamesError
-import pt.jsal.achman.UserGamesService
 import pt.jsal.achman.utils.Either
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -46,6 +46,7 @@ class UserGamesServiceTest {
                     "1",
                     "Game",
                     GameSource.STEAM,
+                    "cover.jpg",
                 ).id
         }
     }
@@ -84,7 +85,7 @@ class UserGamesServiceTest {
         val result = service.createUserGame(userId, 999)
 
         assertIs<Either.Left<*>>(result)
-        assertIs<UserGamesError.UserGameNotFound>(result.value)
+        assertIs<UserGamesError.GameNotFound>(result.value)
     }
 
     @Test
@@ -122,7 +123,7 @@ class UserGamesServiceTest {
         val result = service.findByUserIdAndGameId(userId, gameId)
 
         assertIs<Either.Left<*>>(result)
-        assertIs<UserGamesError.UserGameNotFound>(result.value)
+        assertIs<UserGamesError.GameNotFound>(result.value)
     }
 
     @Test
@@ -143,7 +144,7 @@ class UserGamesServiceTest {
         val result = service.alterSyncOption(userId, gameId)
 
         assertIs<Either.Left<*>>(result)
-        assertIs<UserGamesError.UserGameNotFound>(result.value)
+        assertIs<UserGamesError.GameNotFound>(result.value)
     }
 
     @Test
@@ -159,6 +160,6 @@ class UserGamesServiceTest {
         val result = service.alterSyncOption(userId, 999)
 
         assertIs<Either.Left<*>>(result)
-        assertIs<UserGamesError.UserGameNotFound>(result.value)
+        assertIs<UserGamesError.GameNotFound>(result.value)
     }
 }

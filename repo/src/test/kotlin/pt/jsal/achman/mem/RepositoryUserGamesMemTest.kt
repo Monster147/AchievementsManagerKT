@@ -158,6 +158,44 @@ class RepositoryUserGamesMemTest {
     }
 
     @Test
+    fun `removeUserGames removes all games for a user`() {
+        val ug1 = repo.createUserGame(userId = 1, gameId = 1, synchronize = false)
+        val ug2 = repo.createUserGame(userId = 1, gameId = 2, synchronize = true)
+        val ugOther = repo.createUserGame(userId = 2, gameId = 1, synchronize = false)
+
+        repo.removeUserGames(1)
+
+        assertEquals(emptyList(), repo.findByUserId(1))
+        assertEquals(listOf(ugOther), repo.findByUserId(2))
+    }
+
+    @Test
+    fun `removeUserGames does not affect other users`() {
+        val ug1 = repo.createUserGame(userId = 1, gameId = 1, synchronize = false)
+        val ug2 = repo.createUserGame(userId = 2, gameId = 2, synchronize = true)
+
+        repo.removeUserGames(1)
+
+        assertNull(repo.findById(ug1.id))
+        assertEquals(ug2, repo.findById(ug2.id))
+    }
+
+    @Test
+    fun `removeUserGames on user with no games does nothing`() {
+        repo.createUserGame(userId = 2, gameId = 1, synchronize = false)
+
+        repo.removeUserGames(1)
+
+        assertEquals(1, repo.findAll().size)
+    }
+
+    @Test
+    fun `removeUserGames on empty repo does nothing`() {
+        repo.removeUserGames(1)
+        assertEquals(emptyList(), repo.findAll())
+    }
+
+    @Test
     fun `save updates synchronize flag`() {
         val userGame = repo.createUserGame(userId = 1, gameId = 1, synchronize = false)
         repo.save(userGame.copy(synchronize = true))

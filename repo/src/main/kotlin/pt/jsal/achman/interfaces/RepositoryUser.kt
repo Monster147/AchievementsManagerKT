@@ -10,7 +10,7 @@ import java.time.Instant
 /**
  * Repositório de operações sobre utilizadores.
  */
-interface RepositoryUser : pt.jsal.achman.interfaces.Repository<User> {
+interface RepositoryUser : Repository<User> {
     /**
      * Cria um utilizador no sistema.
      *

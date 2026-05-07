@@ -18,7 +18,7 @@ class RepositoryGameMemTest {
 
     @Test
     fun `createGame returns game with correct fields`() {
-        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
         assertEquals("3070", game.externalGameId)
         assertEquals("Ratchet & Clank", game.name)
         assertEquals(GameSource.RETROACHIEVEMENTS, game.source)
@@ -26,9 +26,9 @@ class RepositoryGameMemTest {
 
     @Test
     fun `createGame assigns sequential ids`() {
-        val g1 = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
-        val g2 = repo.createGame("730", "CS2", GameSource.STEAM)
-        val g3 = repo.createGame("1", "Some PSN Game", GameSource.PSN)
+        val g1 = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
+        val g2 = repo.createGame("730", "CS2", GameSource.STEAM, "cover.png")
+        val g3 = repo.createGame("1", "Some PSN Game", GameSource.PSN, "cover.png")
         assertEquals(1, g1.id)
         assertEquals(2, g2.id)
         assertEquals(3, g3.id)
@@ -36,14 +36,14 @@ class RepositoryGameMemTest {
 
     @Test
     fun `createGame persists to findAll`() {
-        val g1 = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
-        val g2 = repo.createGame("730", "CS2", GameSource.STEAM)
+        val g1 = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
+        val g2 = repo.createGame("730", "CS2", GameSource.STEAM, "cover.png")
         assertEquals(listOf(g1, g2), repo.findAll())
     }
 
     @Test
     fun `findById returns correct game`() {
-        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
         assertEquals(game, repo.findById(game.id))
     }
 
@@ -59,7 +59,7 @@ class RepositoryGameMemTest {
 
     @Test
     fun `findByExternalId returns correct game`() {
-        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
         assertEquals(game, repo.findByExternalId("3070", GameSource.RETROACHIEVEMENTS))
     }
 
@@ -70,15 +70,15 @@ class RepositoryGameMemTest {
 
     @Test
     fun `findByExternalId distinguishes between sources`() {
-        val raGame = repo.createGame("100", "RA Game", GameSource.RETROACHIEVEMENTS)
-        val steamGame = repo.createGame("100", "Steam Game", GameSource.STEAM)
+        val raGame = repo.createGame("100", "RA Game", GameSource.RETROACHIEVEMENTS, "cover.png")
+        val steamGame = repo.createGame("100", "Steam Game", GameSource.STEAM, "cover.png")
         assertEquals(raGame, repo.findByExternalId("100", GameSource.RETROACHIEVEMENTS))
         assertEquals(steamGame, repo.findByExternalId("100", GameSource.STEAM))
     }
 
     @Test
     fun `findByExternalId returns null when source does not match`() {
-        repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+        repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
         assertNull(repo.findByExternalId("3070", GameSource.STEAM))
     }
 
@@ -89,7 +89,7 @@ class RepositoryGameMemTest {
 
     @Test
     fun `updateGameInfo updates all fields`() {
-        val game = repo.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
         val updated =
             repo.updateGameInfo(
@@ -114,7 +114,7 @@ class RepositoryGameMemTest {
 
     @Test
     fun `updateGameInfo keeps old values when null is passed`() {
-        val game = repo.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
         val updated =
             repo.updateGameInfo(
@@ -133,7 +133,7 @@ class RepositoryGameMemTest {
 
     @Test
     fun `updateGameInfo persists changes in repository`() {
-        val game = repo.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
         repo.updateGameInfo(
             game = game,
@@ -152,7 +152,7 @@ class RepositoryGameMemTest {
 
     @Test
     fun `updateGameInfo does not duplicate game`() {
-        val game = repo.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
         repo.updateGameInfo(
             game = game,
@@ -170,7 +170,7 @@ class RepositoryGameMemTest {
 
     @Test
     fun `updateGameInfo updates only provided fields`() {
-        val game = repo.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
         val updated =
             repo.updateGameInfo(
@@ -196,15 +196,15 @@ class RepositoryGameMemTest {
 
     @Test
     fun `findAll returns all games`() {
-        val g1 = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
-        val g2 = repo.createGame("730", "CS2", GameSource.STEAM)
-        val g3 = repo.createGame("1", "Some PSN Game", GameSource.PSN)
+        val g1 = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
+        val g2 = repo.createGame("730", "CS2", GameSource.STEAM, "cover.png")
+        val g3 = repo.createGame("1", "Some PSN Game", GameSource.PSN, "cover.png")
         assertEquals(listOf(g1, g2, g3), repo.findAll())
     }
 
     @Test
     fun `save updates existing game`() {
-        val game = repo.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS, "cover.png")
         val updated = game.copy(name = "New Name")
         repo.save(updated)
         assertEquals("New Name", repo.findById(game.id)?.name)
@@ -212,7 +212,7 @@ class RepositoryGameMemTest {
 
     @Test
     fun `save updates all fields`() {
-        val game = repo.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS, "cover.png")
         val updated = game.copy(name = "New Name", externalGameId = "9999", source = GameSource.STEAM)
         repo.save(updated)
         assertEquals(updated, repo.findById(game.id))
@@ -220,22 +220,22 @@ class RepositoryGameMemTest {
 
     @Test
     fun `save does not duplicate game`() {
-        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
         repo.save(game.copy(name = "Updated"))
         assertEquals(1, repo.findAll().size)
     }
 
     @Test
     fun `deleteById removes game`() {
-        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
         repo.deleteById(game.id)
         assertNull(repo.findById(game.id))
     }
 
     @Test
     fun `deleteById only removes the correct game`() {
-        val g1 = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
-        val g2 = repo.createGame("730", "CS2", GameSource.STEAM)
+        val g1 = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
+        val g2 = repo.createGame("730", "CS2", GameSource.STEAM, "cover.png")
         repo.deleteById(g1.id)
         assertNull(repo.findById(g1.id))
         assertEquals(g2, repo.findById(g2.id))
@@ -243,15 +243,15 @@ class RepositoryGameMemTest {
 
     @Test
     fun `deleteById on nonexistent id does nothing`() {
-        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+        val game = repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
         repo.deleteById(999)
         assertEquals(game, repo.findById(game.id))
     }
 
     @Test
     fun `clear removes all games`() {
-        repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
-        repo.createGame("730", "CS2", GameSource.STEAM)
+        repo.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
+        repo.createGame("730", "CS2", GameSource.STEAM, "cover.png")
         repo.clear()
         assertEquals(emptyList(), repo.findAll())
     }

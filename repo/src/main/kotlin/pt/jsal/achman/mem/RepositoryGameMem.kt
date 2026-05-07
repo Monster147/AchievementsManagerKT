@@ -8,17 +8,20 @@ import pt.jsal.achman.interfaces.RepositoryGame
 
 class RepositoryGameMem : RepositoryGame {
     private val games = mutableListOf<Game>()
+    private var nextId = 1
 
     override fun createGame(
         externalGameId: String,
         name: String,
         source: GameSource,
+        cover: String,
     ): Game =
         Game(
-            id = games.size + 1,
+            id = nextId++,
             externalGameId = externalGameId,
             name = name,
             source = source,
+            cover = cover,
         ).also { games.add(it) }
 
     override fun findByExternalId(

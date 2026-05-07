@@ -112,6 +112,17 @@ class RepositoryGameProgressJdbi(
         return updated
     }
 
+    override fun removeUserProgress(userId: Int) {
+        handle.createUpdate(
+            """
+            DELETE FROM dbo.game_progress
+            WHERE user_id = :userId
+            """.trimIndent(),
+        )
+            .bind("userId", userId)
+            .execute()
+    }
+
     override fun findById(id: Int): GameProgress? {
         return handle.createQuery(
             """

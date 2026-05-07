@@ -5,7 +5,7 @@ import pt.jsal.achman.usergame.UserGame
 /**
  * Repositório de operações sobre a associação entre utilizadores e jogos.
  */
-interface RepositoryUserGames : pt.jsal.achman.interfaces.Repository<UserGame> {
+interface RepositoryUserGames : Repository<UserGame> {
     /**
      * Cria uma associação entre um utilizador e um jogo.
      *
@@ -51,4 +51,22 @@ interface RepositoryUserGames : pt.jsal.achman.interfaces.Repository<UserGame> {
      * @return [UserGame] atualizado.
      */
     fun alterSyncOption(userGame: UserGame): UserGame
+
+    /**
+     * Remove todos os jogos da biblioteca de um utilizador.
+     *
+     * @param userId Identificador do utilizador.
+     */
+    fun removeUserGames(userId: Int)
+
+    /**
+     * Remove um jogo da biblioteca de um utilizador
+     *
+     * @param userId Identificador do utilizador.
+     * @param gameId Identificador do jogo.
+     */
+    fun removeGame(
+        userId: Int,
+        gameId: Int,
+    )
 }

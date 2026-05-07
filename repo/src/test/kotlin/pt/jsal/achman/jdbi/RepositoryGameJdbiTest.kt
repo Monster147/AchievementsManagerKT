@@ -34,7 +34,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `createGame returns game with correct fields`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             assertEquals("3070", game.externalGameId)
             assertEquals("Ratchet & Clank", game.name)
             assertEquals(GameSource.RETROACHIEVEMENTS, game.source)
@@ -44,7 +44,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `createGame persists to findById`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val found = repoGames.findById(game.id)
             assertNotNull(found)
             assertEquals(game.id, found.id)
@@ -57,8 +57,8 @@ class RepositoryGameJdbiTest {
     @Test
     fun `createGame persists to findAll`() {
         trxManager.run {
-            val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
-            val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM)
+            val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
+            val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
             val all = repoGames.findAll()
             assertEquals(2, all.size)
             assertTrue(all.any { it.id == g1.id })
@@ -83,7 +83,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `findByExternalId returns correct game`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val found = repoGames.findByExternalId("3070", GameSource.RETROACHIEVEMENTS)
             assertNotNull(found)
             assertEquals(game.id, found.id)
@@ -93,8 +93,8 @@ class RepositoryGameJdbiTest {
     @Test
     fun `findByExternalId distinguishes between sources`() {
         trxManager.run {
-            val raGame = repoGames.createGame("100", "RA Game", GameSource.RETROACHIEVEMENTS)
-            val steamGame = repoGames.createGame("100", "Steam Game", GameSource.STEAM)
+            val raGame = repoGames.createGame("100", "RA Game", GameSource.RETROACHIEVEMENTS, "cover.png")
+            val steamGame = repoGames.createGame("100", "Steam Game", GameSource.STEAM, "cover.png")
             val foundRa = repoGames.findByExternalId("100", GameSource.RETROACHIEVEMENTS)
             val foundSteam = repoGames.findByExternalId("100", GameSource.STEAM)
             assertEquals(raGame.id, foundRa?.id)
@@ -105,7 +105,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `findByExternalId returns null when source does not match`() {
         trxManager.run {
-            repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             assertNull(repoGames.findByExternalId("3070", GameSource.STEAM))
         }
     }
@@ -120,7 +120,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `updateGameInfo updates all fields`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             val updated =
                 repoGames.updateGameInfo(
@@ -147,7 +147,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `updateGameInfo persists changes`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             repoGames.updateGameInfo(
                 game = game,
@@ -168,7 +168,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `updateGameInfo keeps old values when null is passed`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             val updated =
                 repoGames.updateGameInfo(
@@ -191,7 +191,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `updateGameInfo updates only provided fields`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             val updated =
                 repoGames.updateGameInfo(
@@ -214,7 +214,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `updateGameInfo updates genre array correctly`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Game", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Game", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             repoGames.updateGameInfo(
                 game = game,
@@ -235,7 +235,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `updateGameInfo does not duplicate game`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             repoGames.updateGameInfo(
                 game = game,
@@ -255,7 +255,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `updateGameInfo round trip validation`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Old", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Old", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             repoGames.updateGameInfo(
                 game = game,
@@ -291,7 +291,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `save updates name`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS, "cover.png")
             val updated = game.copy(name = "New Name")
             repoGames.save(updated)
             assertEquals("New Name", repoGames.findById(game.id)?.name)
@@ -301,7 +301,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `save updates genre`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val updated = game.copy(genre = listOf(GameGenre.ACTION, GameGenre.ADVENTURE))
             repoGames.save(updated)
             val found = repoGames.findById(game.id)
@@ -312,7 +312,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `save updates platform`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val updated = game.copy(platform = GamePlatform.PS2)
             repoGames.save(updated)
             assertEquals(GamePlatform.PS2, repoGames.findById(game.id)?.platform)
@@ -322,7 +322,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `save updates all fields`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS, "cover.png")
             val updated =
                 game.copy(
                     name = "New Name",
@@ -345,7 +345,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `save does not duplicate game`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             repoGames.save(game.copy(name = "Updated"))
             assertEquals(1, repoGames.findAll().size)
         }
@@ -354,7 +354,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `deleteById removes game`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             repoGames.deleteById(game.id)
             assertNull(repoGames.findById(game.id))
         }
@@ -363,8 +363,8 @@ class RepositoryGameJdbiTest {
     @Test
     fun `deleteById only removes the correct game`() {
         trxManager.run {
-            val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
-            val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM)
+            val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
+            val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
             repoGames.deleteById(g1.id)
             assertNull(repoGames.findById(g1.id))
             assertNotNull(repoGames.findById(g2.id))
@@ -374,7 +374,7 @@ class RepositoryGameJdbiTest {
     @Test
     fun `deleteById on nonexistent id does nothing`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             repoGames.deleteById(999)
             assertNotNull(repoGames.findById(game.id))
         }
@@ -383,8 +383,8 @@ class RepositoryGameJdbiTest {
     @Test
     fun `clear removes all games`() {
         trxManager.run {
-            repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
-            repoGames.createGame("730", "CS2", GameSource.STEAM)
+            repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
+            repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
             repoGames.clear()
             assertEquals(emptyList(), repoGames.findAll())
         }

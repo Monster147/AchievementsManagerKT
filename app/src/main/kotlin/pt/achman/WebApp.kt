@@ -13,7 +13,6 @@ import pt.jsal.achman.jdbi.configureWithAppRequirements
 import pt.jsal.achman.mem.TransactionManagerInMem
 import pt.jsal.achman.token.Sha256TokenEncoder
 import pt.jsal.achman.user.UsersDomainConfig
-import pt.jsal.achman.jdbi.configureWithAppRequirements
 import java.time.Clock
 import java.time.Duration
 

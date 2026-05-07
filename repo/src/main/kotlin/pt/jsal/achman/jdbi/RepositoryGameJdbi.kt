@@ -15,18 +15,20 @@ class RepositoryGameJdbi(
         externalGameId: String,
         name: String,
         source: GameSource,
+        cover: String,
     ): Game {
         val id =
             handle.createUpdate(
                 """
-                INSERT INTO dbo.games(external_game_id, name, source)
-                VALUES (:externalGameId, :name, :source)
+                INSERT INTO dbo.games(external_game_id, name, source, cover)
+                VALUES (:externalGameId, :name, :source, :cover)
                 RETURNING id
                 """.trimIndent(),
             )
                 .bind("externalGameId", externalGameId)
                 .bind("name", name)
                 .bind("source", source.name)
+                .bind("cover", cover)
                 .executeAndReturnGeneratedKeys()
                 .mapTo(Int::class.java)
                 .one()
@@ -36,6 +38,7 @@ class RepositoryGameJdbi(
             externalGameId = externalGameId,
             name = name,
             source = source,
+            cover = cover,
         )
     }
 

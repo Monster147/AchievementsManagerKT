@@ -5,7 +5,7 @@ import pt.jsal.achman.achievement.GameProgress
 /**
  * Repositório de operações sobre o progresso de jogos de cada utilizador.
  */
-interface RepositoryGameProgress : pt.jsal.achman.interfaces.Repository<GameProgress> {
+interface RepositoryGameProgress : Repository<GameProgress> {
     /**
      * Cria um registo de progresso de jogo para um utilizador.
      *
@@ -83,4 +83,11 @@ interface RepositoryGameProgress : pt.jsal.achman.interfaces.Repository<GameProg
         userId: Int,
         gameId: Int,
     ): GameProgress?
+
+    /**
+     * Remove todo o progresso de um utilizador
+     *
+     * @param userId Identificador do utilizador.
+     */
+    fun removeUserProgress(userId: Int)
 }

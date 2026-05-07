@@ -254,6 +254,41 @@ class RepositoryGameProgressMemTest {
     }
 
     @Test
+    fun `removeUserProgress removes all progress for a user`() {
+        repo.createGameProgress(userId = 1, gameId = 1)
+        repo.createGameProgress(userId = 1, gameId = 2)
+        repo.createGameProgress(userId = 2, gameId = 1)
+
+        repo.removeUserProgress(1)
+
+        val user1Progress = repo.findByUserId(1)
+        val user2Progress = repo.findByUserId(2)
+
+        assertTrue(user1Progress.isEmpty())
+        assertEquals(1, user2Progress.size)
+    }
+
+    @Test
+    fun `removeUserProgress does not affect other users`() {
+        repo.createGameProgress(userId = 1, gameId = 1)
+        val other = repo.createGameProgress(userId = 2, gameId = 1)
+
+        repo.removeUserProgress(1)
+
+        val found = repo.findById(other.id)
+        assertNotNull(found)
+    }
+
+    @Test
+    fun `removeUserProgress on user with no progress does nothing`() {
+        repo.createGameProgress(userId = 2, gameId = 1)
+
+        repo.removeUserProgress(1)
+
+        assertEquals(1, repo.findAll().size)
+    }
+
+    @Test
     fun `save updates existing progress`() {
         val progress = repo.createGameProgress(userId = 1, gameId = 1)
         val updated = progress.copy(completedAchievements = listOf(1, 2, 3))

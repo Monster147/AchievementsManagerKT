@@ -13,11 +13,13 @@ import pt.jsal.achman.user.PasswordValidationInfo
 fun Jdbi.configureWithAppRequirements(): Jdbi {
     installPlugin(KotlinPlugin())
     installPlugin(PostgresPlugin())
-    registerColumnMapper(PasswordValidationInfo::class.java,
-        PasswordValidationInfoMapper()
+    registerColumnMapper(
+        PasswordValidationInfo::class.java,
+        PasswordValidationInfoMapper(),
     )
-    registerColumnMapper(TokenValidationInfo::class.java,
-        TokenValidationInfoMapper()
+    registerColumnMapper(
+        TokenValidationInfo::class.java,
+        TokenValidationInfoMapper(),
     )
     registerColumnMapper(IntListMapper())
     registerColumnMapper(GameGenreListMapper())

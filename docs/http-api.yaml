@@ -1,0 +1,9 @@
+openapi: 3.1.0
+info:
+  title: AchievementManagerKT
+  description: An achievement manager for games, written in Kotlin.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+paths:
+  

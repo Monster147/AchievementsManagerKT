@@ -4,14 +4,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
+import pt.jsal.achman.GameError
+import pt.jsal.achman.GameService
 import pt.jsal.achman.game.GameGenre
 import pt.jsal.achman.game.GamePlatform
 import pt.jsal.achman.game.GameSource
 import pt.jsal.achman.interfaces.TransactionManager
 import pt.jsal.achman.user.PasswordValidationInfo
 import pt.jsal.achman.user.UserRole
-import pt.jsal.achman.GameError
-import pt.jsal.achman.GameService
 import pt.jsal.achman.utils.Either
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

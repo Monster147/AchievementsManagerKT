@@ -72,6 +72,32 @@ class RepositoryUserGamesJdbi(
         return updatedUserGame
     }
 
+    override fun removeUserGames(userId: Int) {
+        handle.createUpdate(
+            """
+            DELETE FROM dbo.user_games
+            WHERE user_id = :userId
+            """.trimIndent(),
+        )
+            .bind("userId", userId)
+            .execute()
+    }
+
+    override fun removeGame(
+        userId: Int,
+        gameId: Int,
+    ) {
+        handle.createUpdate(
+            """
+            DELETE FROM dbo.user_games
+            WHERE user_id = :userId AND game_id = :gameId
+            """.trimIndent(),
+        )
+            .bind("userId", userId)
+            .bind("gameId", gameId)
+            .execute()
+    }
+
     override fun findById(id: Int): UserGame? {
         return handle.createQuery(
             """

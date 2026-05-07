@@ -5,6 +5,7 @@ import pt.jsal.achman.usergame.UserGame
 
 class RepositoryUserGamesMem : RepositoryUserGames {
     private val userGames = mutableListOf<UserGame>()
+    private var nextId = 1
 
     override fun createUserGame(
         userId: Int,
@@ -12,7 +13,7 @@ class RepositoryUserGamesMem : RepositoryUserGames {
         synchronize: Boolean,
     ): UserGame =
         UserGame(
-            id = userGames.size + 1,
+            id = nextId++,
             userId = userId,
             gameId = gameId,
             synchronize = synchronize,
@@ -29,6 +30,17 @@ class RepositoryUserGamesMem : RepositoryUserGames {
         val updatedUserGame = userGame.copy(synchronize = !userGame.synchronize)
         save(updatedUserGame)
         return updatedUserGame
+    }
+
+    override fun removeUserGames(userId: Int) {
+        userGames.removeIf { it.userId == userId }
+    }
+
+    override fun removeGame(
+        userId: Int,
+        gameId: Int,
+    ) {
+        userGames.removeIf { it.userId == userId && it.gameId == gameId }
     }
 
     override fun findById(id: Int): UserGame? = userGames.find { it.id == id }

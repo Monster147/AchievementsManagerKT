@@ -8,7 +8,7 @@ import pt.jsal.achman.game.GameSource
 /**
  * Repositório de operações sobre jogos.
  */
-interface RepositoryGame : pt.jsal.achman.interfaces.Repository<Game> {
+interface RepositoryGame : Repository<Game> {
     /**
      * Cria um jogo no sistema a partir de um identificador externo.
      *
@@ -22,6 +22,7 @@ interface RepositoryGame : pt.jsal.achman.interfaces.Repository<Game> {
         externalGameId: String,
         name: String,
         source: GameSource,
+        cover: String,
     ): Game
 
     /**

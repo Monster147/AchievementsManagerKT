@@ -11,12 +11,10 @@ import pt.jsal.achman.utils.Either
 import pt.jsal.achman.utils.failure
 import pt.jsal.achman.utils.success
 
-
 /**
  * Representa os possíveis erros associados às operações sobre jogos.
  */
 sealed class GameError {
-
     /**
      * Indica que já existe um jogo com o mesmo identificador externo e origem.
      */
@@ -51,7 +49,6 @@ sealed class GameError {
 class GameService(
     private val trxManager: TransactionManager,
 ) {
-
     /**
      * Cria um jogo.
      *
@@ -72,13 +69,14 @@ class GameService(
         externalGameId: String,
         name: String,
         source: GameSource,
+        cover: String = "",
     ): Either<GameError, Game> =
         trxManager.run {
             val user = repoUsers.findById(userId)
             if (user == null || user.role != UserRole.ADMIN) return@run failure(GameError.UserNotAdmin)
             val existingGame = repoGames.findByExternalId(externalGameId, source)
             if (existingGame != null) return@run failure(GameError.GameAlreadyExists)
-            val newGame = repoGames.createGame(externalGameId, name, source)
+            val newGame = repoGames.createGame(externalGameId, name, source, cover)
             success(newGame)
         }
 

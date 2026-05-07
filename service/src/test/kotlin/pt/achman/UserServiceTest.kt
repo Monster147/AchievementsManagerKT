@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
-import pt.jsal.achman.interfaces.TransactionManager
 import pt.jsal.achman.TokenCreationError
 import pt.jsal.achman.UserError
 import pt.jsal.achman.UserService
+import pt.jsal.achman.interfaces.TransactionManager
 import pt.jsal.achman.utils.Either
 import java.time.Instant
 import kotlin.test.assertEquals
@@ -63,6 +63,45 @@ class UserServiceTest {
 
         assertTrue(result is Either.Left)
         assertTrue(result.value is UserError.InsecurePassword)
+    }
+
+    @Test
+    fun `findUserById returns user`() {
+        val user =
+            userService.createUser("Bob", "bob@mail.com", "Password1!").let {
+                (it as Either.Right).value
+            }
+        val found = userService.findUserById(user.id)
+        assertNotNull(found)
+        assertTrue(found is Either.Right)
+        assertEquals(user.id, found.value.id)
+    }
+
+    @Test
+    fun `findUserById returns error if id does not exist`() {
+        val result = userService.findUserById(999)
+
+        assertTrue(result is Either.Left)
+        assertTrue(result.value is UserError.UserNotFound)
+    }
+
+    @Test
+    fun `deleteUser returns success`() {
+        val user =
+            userService.createUser("Bob", "bob@mail.com", "Password1!").let {
+                check(it is Either.Right)
+                it.value
+            }
+        val result = userService.deleteUser(user.id)
+        assertTrue(result is Either.Right)
+        assertTrue(result.value)
+    }
+
+    @Test
+    fun `deleteUser fails if user does not exist`() {
+        val result = userService.deleteUser(999)
+        assertTrue(result is Either.Left)
+        assertTrue(result.value is UserError.UserNotFound)
     }
 
     @Test

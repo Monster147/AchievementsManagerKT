@@ -11,7 +11,6 @@ import pt.jsal.achman.utils.success
  * Representa os possíveis erros associados às operações sobre a relação utilizador-jogo.
  */
 sealed class UserGamesError {
-
     /**
      * Indica que já existe uma associação entre o utilizador e o jogo.
      */
@@ -20,7 +19,7 @@ sealed class UserGamesError {
     /**
      * Indica que a associação entre o utilizador e o jogo não foi encontrada.
      */
-    data object UserGameNotFound : UserGamesError()
+    data object GameNotFound : UserGamesError()
 
     /**
      * Indica que o utilizador especificado não foi encontrado.
@@ -65,7 +64,7 @@ class UserGamesService(
     ): Either<UserGamesError, UserGame> =
         trxManager.run {
             repoUsers.findById(userId) ?: return@run failure(UserGamesError.UserNotFound)
-            repoGames.findById(gameId) ?: return@run failure(UserGamesError.UserGameNotFound)
+            repoGames.findById(gameId) ?: return@run failure(UserGamesError.GameNotFound)
             val existing = repoUserGames.findByUserIdAndGameId(userId, gameId)
             if (existing != null) return@run failure(UserGamesError.UserGameAlreadyExists)
             val userGame = repoUserGames.createUserGame(userId, gameId, synchronize = false)
@@ -99,7 +98,7 @@ class UserGamesService(
         trxManager.run {
             val userGame = repoUserGames.findByUserIdAndGameId(userId, gameId)
             if (userGame == null) {
-                failure(UserGamesError.UserGameNotFound)
+                failure(UserGamesError.GameNotFound)
             } else {
                 success(userGame)
             }
@@ -124,13 +123,48 @@ class UserGamesService(
     ): Either<UserGamesError, UserGame> =
         trxManager.run {
             repoUsers.findById(userId) ?: return@run failure(UserGamesError.UserNotFound)
-            repoGames.findById(gameId) ?: return@run failure(UserGamesError.UserGameNotFound)
+            repoGames.findById(gameId) ?: return@run failure(UserGamesError.GameNotFound)
             val userGame = repoUserGames.findByUserIdAndGameId(userId, gameId)
             if (userGame == null) {
-                failure(UserGamesError.UserGameNotFound)
+                failure(UserGamesError.GameNotFound)
             } else {
                 val userGameUpdated = repoUserGames.alterSyncOption(userGame)
                 success(userGameUpdated)
+            }
+        }
+
+    /**
+     * Remove os jogos da biblioteca de um utilizador
+     *
+     * @param userId identificador do utilizador.
+     */
+    fun removeUserGames(userId: Int): Either<UserGamesError, Unit> =
+        trxManager.run {
+            repoUsers.findById(userId) ?: return@run failure(UserGamesError.UserNotFound)
+            repoUserGames.removeUserGames(userId)
+            repoGameProgress.removeUserProgress(userId)
+            success(Unit)
+        }
+
+    /**
+     * Remove um jogo da biblioteca de um utilizador
+     *
+     * @param userId identificador do utilizador.
+     * @param gameId identificador do jogo.
+     */
+    fun removeGame(
+        userId: Int,
+        gameId: Int,
+    ): Either<UserGamesError, Unit> =
+        trxManager.run {
+            repoUsers.findById(userId) ?: return@run failure(UserGamesError.UserNotFound)
+            repoGames.findById(gameId) ?: return@run failure(UserGamesError.GameNotFound)
+            val userGame = repoUserGames.findByUserIdAndGameId(userId, gameId)
+            if (userGame == null) {
+                failure(UserGamesError.GameNotFound)
+            } else {
+                repoUserGames.removeGame(userId, gameId)
+                success(Unit)
             }
         }
 }

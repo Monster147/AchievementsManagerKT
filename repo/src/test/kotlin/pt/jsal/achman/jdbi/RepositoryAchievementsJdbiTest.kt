@@ -35,7 +35,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `createAchievement returns achievement with correct fields`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement =
                 repoAchievements.createAchievement(
                     "254397",
@@ -55,7 +55,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `createAchievement persists to findById`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement =
                 repoAchievements.createAchievement(
                     "254397",
@@ -75,7 +75,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `createAchievement persists to findAll`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val a1 = repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", game.id)
             val a2 = repoAchievements.createAchievement("api2", "Achievement 2", "icon2.png", "Desc 2", game.id)
             val all = repoAchievements.findAll()
@@ -102,8 +102,8 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `findByGameId returns all achievements for a game`() {
         trxManager.run {
-            val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
-            val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM)
+            val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
+            val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
             val a1 = repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", g1.id)
             val a2 = repoAchievements.createAchievement("api2", "Achievement 2", "icon2.png", "Desc 2", g1.id)
             repoAchievements.createAchievement("api3", "Achievement 3", "icon3.png", "Desc 3", g2.id)
@@ -117,7 +117,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `findByGameId returns empty when no achievements for game`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             assertEquals(emptyList(), repoAchievements.findByGameId(game.id))
         }
     }
@@ -125,7 +125,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `findByApiName returns correct achievement`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement =
                 repoAchievements.createAchievement(
                     "254397",
@@ -150,7 +150,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `findByApiName only returns exact match`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", game.id)
             assertNull(repoAchievements.findByApiName("api"))
             assertNull(repoAchievements.findByApiName("api11"))
@@ -160,8 +160,8 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `removeAchievements removes all achievements for a game`() {
         trxManager.run {
-            val game1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
-            val game2 = repoGames.createGame("3072", "Ratchet & Clank 2", GameSource.RETROACHIEVEMENTS)
+            val game1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
+            val game2 = repoGames.createGame("3072", "Ratchet & Clank 2", GameSource.RETROACHIEVEMENTS, "cover.png")
             repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", game1.id)
             repoAchievements.createAchievement("api2", "Achievement 2", "icon2.png", "Desc 2", game1.id)
             val achievement = repoAchievements.createAchievement("api3", "Achievement 3", "icon3.png", "Desc 3", game2.id)
@@ -174,7 +174,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `removeAchievements on game with no achievements does nothing`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", game.id)
             assertTrue(repoAchievements.findByGameId(999).isEmpty())
             repoAchievements.removeAchievements(999)
@@ -186,7 +186,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `updateGameInfo updates all fields in database`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             val updated =
                 repoGames.updateGameInfo(
@@ -209,7 +209,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `updateGameInfo keeps old values when null is passed`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             val updated =
                 repoGames.updateGameInfo(
@@ -232,7 +232,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `updateGameInfo persists changes`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Old Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             repoGames.updateGameInfo(
                 game = game,
@@ -254,7 +254,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `updateGameInfo does not create new row`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             repoGames.updateGameInfo(
                 game = game,
@@ -275,7 +275,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `updateGameInfo updates genres array correctly`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Name", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             repoGames.updateGameInfo(
                 game = game,
@@ -304,7 +304,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `save updates existing achievement`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Old Name", "icon.png", "Desc", game.id)
             repoAchievements.save(achievement.copy(name = "New Name"))
             assertEquals("New Name", repoAchievements.findById(achievement.id)?.name)
@@ -314,7 +314,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `save updates all fields`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Old Name", "old.png", "Old Desc", game.id)
             val updated = achievement.copy(name = "New Name", icon = "new.png", description = "New Desc")
             repoAchievements.save(updated)
@@ -328,7 +328,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `save does not duplicate achievement`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             repoAchievements.save(achievement.copy(name = "Updated"))
             assertEquals(1, repoAchievements.findAll().size)
@@ -338,7 +338,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `deleteById removes achievement`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             repoAchievements.deleteById(achievement.id)
             assertNull(repoAchievements.findById(achievement.id))
@@ -348,7 +348,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `deleteById only removes the correct achievement`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val a1 = repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", game.id)
             val a2 = repoAchievements.createAchievement("api2", "Achievement 2", "icon2.png", "Desc 2", game.id)
             repoAchievements.deleteById(a1.id)
@@ -360,7 +360,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `deleteById on nonexistent id does nothing`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             repoAchievements.deleteById(999)
             assertNotNull(repoAchievements.findById(achievement.id))
@@ -370,7 +370,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `clear removes all achievements`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", game.id)
             repoAchievements.createAchievement("api2", "Achievement 2", "icon2.png", "Desc 2", game.id)
             repoAchievements.clear()
@@ -389,7 +389,7 @@ class RepositoryAchievementsJdbiTest {
     @Test
     fun `deleting a game cascades to its achievements`() {
         trxManager.run {
-            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS)
+            val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             repoGames.deleteById(game.id)
             assertNull(repoAchievements.findById(achievement.id))

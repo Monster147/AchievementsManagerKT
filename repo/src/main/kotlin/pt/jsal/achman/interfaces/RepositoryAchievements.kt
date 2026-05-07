@@ -5,8 +5,7 @@ import pt.jsal.achman.achievement.Achievement
 /**
  * Repositório de operações sobre achievements (conquistas).
  */
-interface RepositoryAchievements : pt.jsal.achman.interfaces.Repository<pt.jsal.achman.achievement.Achievement> {
-
+interface RepositoryAchievements : Repository<Achievement> {
     /**
      * Cria um achievement associada a um jogo.
      *

@@ -165,6 +165,36 @@ class UserService(
     }
 
     /**
+     * Obtém um utilizador pelo identificador.
+     *
+     * @param userId Identificador do utilizador.
+     *
+     * @return [User] correspondente, ou erro do tipo [UserError].
+     */
+    fun findUserById(userId: Int): Either<UserError, User> =
+        trxManager.run {
+            val user = repoUsers.findById(userId)
+            if (user == null) {
+                failure(UserError.UserNotFound)
+            } else {
+                success(user)
+            }
+        }
+
+    fun deleteUser(userId: Int): Either<UserError, Boolean> =
+        trxManager.run {
+            val user = repoUsers.findById(userId)
+            if (user == null) {
+                failure(UserError.UserNotFound)
+            } else {
+                repoUsers.deleteById(userId)
+                repoUserGames.removeUserGames(userId)
+                repoGameProgress.removeUserProgress(userId)
+                success(true)
+            }
+        }
+
+    /**
      * Cria um token de autenticação para um utilizador.
      *
      * Valida as credenciais e gera um novo token com informação temporal associada.
