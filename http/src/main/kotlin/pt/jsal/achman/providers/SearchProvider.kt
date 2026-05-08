@@ -23,7 +23,7 @@ class SearchProvider(
         cache.clear()
         when (source) {
             GameSource.STEAM -> {
-                val results = steamSearch.searchGames(config, gameName)
+                val results = steamSearch.searchGames(gameName)
                 addToCache(results)
                 return results
             }

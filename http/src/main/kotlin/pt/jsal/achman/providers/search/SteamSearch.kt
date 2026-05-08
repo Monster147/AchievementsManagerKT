@@ -23,7 +23,6 @@ class SteamSearch(
     private val mapper = jacksonObjectMapper()
 
     suspend fun searchGames(
-        config: IntegrationsConfig,
         gameName: String,
     ): List<SearchedGame> {
         val encodedName = URLEncoder.encode(gameName, StandardCharsets.UTF_8)
@@ -63,39 +62,3 @@ class SteamSearch(
             mapper.readTree(response.body())
         }
 }
-
-fun main() =
-    runBlocking {
-        val client = HttpClient.newHttpClient()
-
-        val steamSearch =
-            SteamSearch(client)
-
-        val config =
-            IntegrationsConfig(
-                STEAM_API_KEY = "",
-                STEAM_USERID = "",
-                RETRO_API_KEY = "",
-                RETRO_USERNAME = "",
-                PSN_API_KEY = "",
-            )
-
-        val games =
-            steamSearch.searchGames(
-                config,
-                "Assassin's Creed",
-            )
-
-        games.forEach {
-            println(
-                """
-                Name: ${it.name}
-                External ID: ${it.externalGameId}
-                Cover: ${it.cover}
-                Source: ${it.source}
-                """.trimIndent(),
-            )
-
-            println("------------")
-        }
-    }
