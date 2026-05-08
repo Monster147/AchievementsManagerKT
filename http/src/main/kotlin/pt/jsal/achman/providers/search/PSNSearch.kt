@@ -16,7 +16,7 @@ class PSNSearch(
 
     suspend fun searchGames(
         config: IntegrationsConfig,
-        gameName: String
+        gameName: String,
     ): List<SearchedGame> {
         val encodedName = URLEncoder.encode(gameName, StandardCharsets.UTF_8)
         return emptyList()

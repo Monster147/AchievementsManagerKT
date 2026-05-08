@@ -24,13 +24,14 @@ class IntegrationsConfigService(
         trxManager.run {
             val current = repoConfig.getConfig(userId)
 
-            val updated = current.copy(
-                STEAM_API_KEY = steamApiKey ?: current.STEAM_API_KEY,
-                STEAM_USERID = steamUserId ?: current.STEAM_USERID,
-                RETRO_API_KEY = retroApiKey ?: current.RETRO_API_KEY,
-                RETRO_USERNAME = retroUsername ?: current.RETRO_USERNAME,
-                PSN_API_KEY = psnApiKey ?: current.PSN_API_KEY,
-            )
+            val updated =
+                current.copy(
+                    STEAM_API_KEY = steamApiKey ?: current.STEAM_API_KEY,
+                    STEAM_USERID = steamUserId ?: current.STEAM_USERID,
+                    RETRO_API_KEY = retroApiKey ?: current.RETRO_API_KEY,
+                    RETRO_USERNAME = retroUsername ?: current.RETRO_USERNAME,
+                    PSN_API_KEY = psnApiKey ?: current.PSN_API_KEY,
+                )
 
             repoConfig.updateConfig(userId, updated)
         }

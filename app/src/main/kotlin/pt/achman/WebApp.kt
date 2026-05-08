@@ -42,10 +42,10 @@ class JdbiConfig {
 
 @Configuration
 class HttpClientConfig {
-
     @Bean
     fun httpClient(): HttpClient =
-        HttpClient.newBuilder()
+        HttpClient
+            .newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .version(HttpClient.Version.HTTP_2)
             .build()

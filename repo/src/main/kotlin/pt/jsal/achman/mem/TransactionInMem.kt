@@ -14,7 +14,7 @@ class TransactionInMem(
     override val repoUserGames: RepositoryUserGames,
     override val repoAchievements: RepositoryAchievements,
     override val repoGameProgress: RepositoryGameProgress,
-    override val repoConfig: RepositoryIntegrationConfig
+    override val repoConfig: RepositoryIntegrationConfig,
 ) : Transaction {
     override fun rollback(): Unit = throw UnsupportedOperationException()
 }

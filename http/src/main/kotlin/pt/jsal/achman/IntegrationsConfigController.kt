@@ -12,13 +12,10 @@ import pt.jsal.achman.user.AuthenticatedUser
 @RestController
 @RequestMapping("/api/configs")
 class IntegrationsConfigController(
-    private val integrationsConfigService: IntegrationsConfigService
+    private val integrationsConfigService: IntegrationsConfigService,
 ) {
-
     @GetMapping
-    fun getConfig(
-        user: AuthenticatedUser,
-    ): ResponseEntity<*> {
+    fun getConfig(user: AuthenticatedUser): ResponseEntity<*> {
         val config = integrationsConfigService.getConfig(user.user.id)
         return ResponseEntity.ok(config)
     }
@@ -28,14 +25,15 @@ class IntegrationsConfigController(
         user: AuthenticatedUser,
         @RequestBody config: UpdateIntegrationsConfigInput,
     ): ResponseEntity<*> {
-        val config = integrationsConfigService.updateConfig(
-            user.user.id,
-            config.steamApiKey,
-            config.steamUserId,
-            config.retroApiKey,
-            config.retroUsername,
-            config.psnApiKey,
-        )
+        val config =
+            integrationsConfigService.updateConfig(
+                user.user.id,
+                config.steamApiKey,
+                config.steamUserId,
+                config.retroApiKey,
+                config.retroUsername,
+                config.psnApiKey,
+            )
         return ResponseEntity.ok(config)
     }
 }

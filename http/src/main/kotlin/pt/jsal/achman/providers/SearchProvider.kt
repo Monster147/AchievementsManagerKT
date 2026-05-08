@@ -11,18 +11,18 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class SearchProvider(
     private val steamSearch: SteamSearch,
-    private val psnSearch: PSNSearch
+    private val psnSearch: PSNSearch,
 ) {
     private val cache = ConcurrentHashMap<Int, SearchedGame>()
 
     suspend fun searchGames(
         config: IntegrationsConfig,
         gameName: String,
-        source: GameSource
+        source: GameSource,
     ): List<SearchedGame> {
         cache.clear()
-        when(source) {
-            GameSource.STEAM ->{
+        when (source) {
+            GameSource.STEAM -> {
                 val results = steamSearch.searchGames(config, gameName)
                 addToCache(results)
                 return results
@@ -39,9 +39,10 @@ class SearchProvider(
 
     private fun addToCache(results: List<SearchedGame>) {
         results.forEachIndexed { index, game ->
-            val updatedGame = game.copy(
-                id = index,
-            )
+            val updatedGame =
+                game.copy(
+                    id = index,
+                )
             cache[index + 1] = updatedGame
         }
     }

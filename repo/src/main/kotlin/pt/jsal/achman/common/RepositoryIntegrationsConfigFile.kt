@@ -9,19 +9,18 @@ import java.nio.file.StandardOpenOption
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-class RepositoryIntegrationsConfigFile: RepositoryIntegrationConfig {
+class RepositoryIntegrationsConfigFile : RepositoryIntegrationConfig {
     private val objectMapper = ObjectMapper()
 
     private val lock = ReentrantLock()
 
-    private fun path(userId: Int): Path =
-        Path.of("config/users/$userId/integrations.json")
+    private fun path(userId: Int): Path = Path.of("config/users/$userId/integrations.json")
 
     override fun getConfig(userId: Int): IntegrationsConfig =
         lock.withLock {
             val file = path(userId)
 
-            if(!Files.exists(file)) {
+            if (!Files.exists(file)) {
                 return IntegrationsConfig()
             }
 
@@ -32,24 +31,25 @@ class RepositoryIntegrationsConfigFile: RepositoryIntegrationConfig {
 
     override fun updateConfig(
         userId: Int,
-        config: IntegrationsConfig
+        config: IntegrationsConfig,
     ): IntegrationsConfig =
         lock.withLock {
             val file = path(userId)
 
-            if(!Files.exists(file.parent)) {
+            if (!Files.exists(file.parent)) {
                 Files.createDirectories(file.parent)
             }
 
-            val json = objectMapper
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(config)
+            val json =
+                objectMapper
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(config)
 
             Files.writeString(
                 file,
                 json,
                 StandardOpenOption.CREATE,
-                StandardOpenOption.TRUNCATE_EXISTING
+                StandardOpenOption.TRUNCATE_EXISTING,
             )
 
             config

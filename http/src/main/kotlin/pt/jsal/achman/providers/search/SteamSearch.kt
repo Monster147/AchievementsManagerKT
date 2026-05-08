@@ -19,26 +19,27 @@ import java.nio.charset.StandardCharsets
 @Component
 class SteamSearch(
     private val client: HttpClient,
-){
+) {
     private val mapper = jacksonObjectMapper()
 
     suspend fun searchGames(
         config: IntegrationsConfig,
-        gameName: String
+        gameName: String,
     ): List<SearchedGame> {
         val encodedName = URLEncoder.encode(gameName, StandardCharsets.UTF_8)
-        val json = getJson(
-            "https://store.steampowered.com/api/storesearch/?term=$encodedName&cc=us&l=en"
-        )
+        val json =
+            getJson(
+                "https://store.steampowered.com/api/storesearch/?term=$encodedName&cc=us&l=en",
+            )
 
         val items = json["items"] ?: return emptyList()
 
-        return items.map{ item ->
+        return items.map { item ->
             SearchedGame(
                 externalGameId = item["id"].asText(),
                 name = item["name"].asText(),
                 source = GameSource.STEAM,
-                cover = item["tiny_image"].asText()
+                cover = item["tiny_image"].asText(),
             )
         }
     }
@@ -56,7 +57,7 @@ class SteamSearch(
             val response =
                 client.send(
                     request,
-                    HttpResponse.BodyHandlers.ofByteArray()
+                    HttpResponse.BodyHandlers.ofByteArray(),
                 )
 
             val raw = response.body()

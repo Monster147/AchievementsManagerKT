@@ -7,6 +7,6 @@ interface RepositoryIntegrationConfig {
 
     fun updateConfig(
         userId: Int,
-        config: IntegrationsConfig
+        config: IntegrationsConfig,
     ): IntegrationsConfig
 }
