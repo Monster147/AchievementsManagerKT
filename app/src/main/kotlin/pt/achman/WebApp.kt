@@ -13,6 +13,7 @@ import pt.jsal.achman.jdbi.configureWithAppRequirements
 import pt.jsal.achman.mem.TransactionManagerInMem
 import pt.jsal.achman.token.Sha256TokenEncoder
 import pt.jsal.achman.user.UsersDomainConfig
+import java.net.http.HttpClient
 import java.time.Clock
 import java.time.Duration
 
@@ -37,6 +38,17 @@ class JdbiConfig {
 
     @Bean
     fun trxManagerJdbi(jdbi: Jdbi): TransactionManagerJdbi = TransactionManagerJdbi(jdbi)
+}
+
+@Configuration
+class HttpClientConfig {
+
+    @Bean
+    fun httpClient(): HttpClient =
+        HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .version(HttpClient.Version.HTTP_2)
+            .build()
 }
 
 @SpringBootApplication(scanBasePackages = ["pt.achman"])

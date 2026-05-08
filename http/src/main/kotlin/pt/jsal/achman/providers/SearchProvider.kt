@@ -23,7 +23,15 @@ class SearchProvider(
         cache.clear()
         when(source) {
             GameSource.STEAM ->{
+                val results = steamSearch.searchGames(config, gameName)
+                addToCache(results)
+                return results
+            }
 
+            GameSource.PSN -> {
+                val results = psnSearch.searchGames(config, gameName)
+                addToCache(results)
+                return results
             }
             else -> return emptyList()
         }
@@ -31,7 +39,10 @@ class SearchProvider(
 
     private fun addToCache(results: List<SearchedGame>) {
         results.forEachIndexed { index, game ->
-            cache[index + 1] = game
+            val updatedGame = game.copy(
+                id = index,
+            )
+            cache[index + 1] = updatedGame
         }
     }
 

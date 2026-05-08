@@ -19,7 +19,7 @@ class GamesRouter(
     private val integrationsConfigService: IntegrationsConfigService,
 ) {
 
-    @PostMapping
+    /*@PostMapping
     suspend fun searchGames(
         user: AuthenticatedUser,
         @RequestBody searchRequest: SearchGameRequest,
@@ -32,5 +32,5 @@ class GamesRouter(
             searchRequest.source,
         )
 
-    }
+    }*/
 }
