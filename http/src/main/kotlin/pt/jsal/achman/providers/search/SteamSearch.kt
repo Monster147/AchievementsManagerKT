@@ -57,11 +57,8 @@ class SteamSearch(
             val response =
                 client.send(
                     request,
-                    HttpResponse.BodyHandlers.ofByteArray(),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8),
                 )
-
-            val raw = response.body()
-            println(String(raw, StandardCharsets.UTF_8))
 
             mapper.readTree(response.body())
         }
