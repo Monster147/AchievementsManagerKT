@@ -1,11 +1,10 @@
-package pt.jsal.achman.providers.search
+package pt.jsal.achman.providers.achievements
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.future.await
 import org.springframework.stereotype.Component
+import pt.jsal.achman.achievement.Achievement
 import pt.jsal.achman.config.IntegrationsConfig
-import pt.jsal.achman.game.GameSource
-import pt.jsal.achman.game.SearchedGame
 import pt.jsal.achman.interfaces.TransactionManager
 import pt.jsal.achman.providers.psnutils.PSN_TROPHY_BASE_URL
 import pt.jsal.achman.providers.psnutils.authenticate
@@ -16,29 +15,27 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 @Component
-class PSNSearch(
+class PSNAchievements(
     private val client: HttpClient,
     private val trxManager: TransactionManager,
 ) {
     private val mapper = jacksonObjectMapper()
 
-    suspend fun searchGames(
+    suspend fun getAchievements(
         userId: Int,
         config: IntegrationsConfig,
-        gameName: String,
-    ): List<SearchedGame> {
+        externalGameId: String,
+    ): List<Achievement> {
         ensureAuthenticated(userId, config, client)
-
+        val fullExternalGameId = "${externalGameId}_00"
         if (config.authTokens != null) {
+            val url = "$PSN_TROPHY_BASE_URL/v1/npCommunicationIds/$fullExternalGameId/trophyGroups/all/trophies?npServiceName=trophy"
             val request =
                 HttpRequest.newBuilder()
-                    .uri(
-                        URI.create(
-                            "$PSN_TROPHY_BASE_URL/v1/users/me/trophyTitles",
-                        ),
-                    )
+                    .uri(URI.create(url))
                     .header("Authorization", "Bearer ${config.authTokens?.accessToken}")
                     .header("Content-Type", "application/json")
+                    .header("Accept-Language", "pt-PT")
                     .GET()
                     .build()
 
@@ -54,33 +51,26 @@ class PSNSearch(
 
             val json = mapper.readTree(response.body())
 
-            val gamesNode = json["trophyTitles"]
+            val trophiesNode =
+                json["trophies"]
+                    ?: return emptyList()
 
-            val games =
-                gamesNode.map { g ->
-                    SearchedGame(
-                        externalGameId =
-                            g["npCommunicationId"]
-                                .asText()
-                                .substringBefore("_00"),
-                        name = g["trophyTitleName"].asText(),
-                        cover = g["trophyTitleIconUrl"].asText(),
-                        source = GameSource.PSN,
+            val trophies =
+                trophiesNode.map { t ->
+                    Achievement(
+                        id = 0,
+                        apiName = t["trophyId"].asText(),
+                        name = t["trophyName"].asText(),
+                        icon = t["trophyIconUrl"].asText(),
+                        description = t["trophyDetail"].asText(),
+                        gameId = 0,
                     )
                 }
 
-            val keywords =
-                gameName.lowercase()
-                    .split("\\s+".toRegex())
-
-            return games.filter {
-                val lowerName = it.name.lowercase()
-
-                keywords.all(lowerName::contains)
-            }
+            return trophies
+        } else {
+            return emptyList()
         }
-
-        return emptyList()
     }
 
     private suspend fun ensureAuthenticated(

@@ -49,4 +49,10 @@ sealed class Problem(
 
     // userGames
     data object UserGameAlreadyExists : Problem(URI("${PROBLEM_URI_PATH}/user-game-already-exists"))
+
+    // gameSearch
+    data object NoGameFound : Problem(URI("${PROBLEM_URI_PATH}/no-game-found"))
+
+    // getAchievement
+    data object NoAchievementFound : Problem(URI("${PROBLEM_URI_PATH}/no-achievement-found"))
 }

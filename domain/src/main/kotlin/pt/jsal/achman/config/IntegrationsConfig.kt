@@ -6,4 +6,6 @@ data class IntegrationsConfig(
     val RETRO_API_KEY: String = "",
     val RETRO_USERNAME: String = "",
     val PSN_API_KEY: String = "",
+    var authTokens: AuthTokensResponse? = null,
+    var tokenExpiresAt: Long = 0,
 )

@@ -1,4 +1,4 @@
-package pt.jsal.achman.providers.psnutils
+package pt.jsal.achman.config
 
 data class AuthTokensResponse(
     /** Used to retrieve data from the PSN API. */

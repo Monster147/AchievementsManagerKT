@@ -6,7 +6,14 @@ import pt.jsal.achman.game.GameSource
 import pt.jsal.achman.game.SearchedGame
 import pt.jsal.achman.providers.search.PSNSearch
 import pt.jsal.achman.providers.search.SteamSearch
+import pt.jsal.achman.utils.Either
+import pt.jsal.achman.utils.failure
+import pt.jsal.achman.utils.success
 import java.util.concurrent.ConcurrentHashMap
+
+sealed class SearchError {
+    object NoGameFound : SearchError()
+}
 
 @Component
 class SearchProvider(
@@ -16,24 +23,28 @@ class SearchProvider(
     private val cache = ConcurrentHashMap<Int, SearchedGame>()
 
     suspend fun searchGames(
+        userId: Int,
         config: IntegrationsConfig,
         gameName: String,
         source: GameSource,
-    ): List<SearchedGame> {
+    ): Either<SearchError, List<SearchedGame>> {
         cache.clear()
-        when (source) {
+        return when (source) {
             GameSource.STEAM -> {
                 val results = steamSearch.searchGames(gameName)
+                if (results.isEmpty()) return failure(SearchError.NoGameFound)
                 addToCache(results)
-                return results
+                success(results)
             }
 
             GameSource.PSN -> {
-                val results = psnSearch.searchGames(config, gameName)
+                val results = psnSearch.searchGames(userId, config, gameName)
+                if (results.isEmpty()) return failure(SearchError.NoGameFound)
                 addToCache(results)
-                return results
+                success(results)
             }
-            else -> return emptyList()
+
+            else -> failure(SearchError.NoGameFound)
         }
     }
 
@@ -48,4 +59,6 @@ class SearchProvider(
     }
 
     fun getCachedGame(id: Int): SearchedGame? = cache[id]
+
+    fun getCache(): List<SearchedGame> = cache.values.toList()
 }

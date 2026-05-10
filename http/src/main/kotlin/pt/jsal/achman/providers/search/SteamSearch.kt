@@ -1,12 +1,8 @@
 package pt.jsal.achman.providers.search
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.future.await
 import org.springframework.stereotype.Component
-import pt.jsal.achman.config.IntegrationsConfig
 import pt.jsal.achman.game.GameSource
 import pt.jsal.achman.game.SearchedGame
 import java.net.URI
@@ -22,14 +18,24 @@ class SteamSearch(
 ) {
     private val mapper = jacksonObjectMapper()
 
-    suspend fun searchGames(
-        gameName: String,
-    ): List<SearchedGame> {
+    suspend fun searchGames(gameName: String): List<SearchedGame> {
         val encodedName = URLEncoder.encode(gameName, StandardCharsets.UTF_8)
-        val json =
-            getJson(
-                "https://store.steampowered.com/api/storesearch/?term=$encodedName&cc=us&l=en",
-            )
+        val url = "https://store.steampowered.com/api/storesearch/?term=$encodedName&cc=us&l=en"
+        val request =
+            HttpRequest
+                .newBuilder()
+                .GET()
+                .uri(URI.create(url))
+                .header("Accept", "application/json")
+                .build()
+
+        val response =
+            client.sendAsync(
+                request,
+                HttpResponse.BodyHandlers.ofString(),
+            ).await()
+
+        val json = mapper.readTree(response.body())
 
         val items = json["items"] ?: return emptyList()
 
@@ -42,23 +48,4 @@ class SteamSearch(
             )
         }
     }
-
-    private suspend fun getJson(url: String): JsonNode =
-        withContext(Dispatchers.IO) {
-            val request =
-                HttpRequest
-                    .newBuilder()
-                    .GET()
-                    .uri(URI.create(url))
-                    .header("Accept", "application/json")
-                    .build()
-
-            val response =
-                client.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8),
-                )
-
-            mapper.readTree(response.body())
-        }
 }

@@ -2,6 +2,8 @@ package pt.jsal.achman.providers.psnutils
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.future.await
+import pt.jsal.achman.config.AuthTokensResponse
+import pt.jsal.achman.config.IntegrationsConfig
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -11,6 +13,8 @@ import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
 
 private const val PSN_AUTH_BASE_URL = "https://ca.account.sony.com/api/authz/v3/oauth"
+
+const val PSN_TROPHY_BASE_URL = "https://m.np.playstation.com/api/trophy"
 private const val CLIENT_ID = "09515159-7237-4370-9b40-3806e67c0891"
 private const val CLIENT_SECRET_BASIC =
     "Basic MDk1MTUxNTktNzIzNy00MzcwLTliNDAtMzgwNmU2N2MwODkxOnVjUGprYTV0bnRCMktxc1A="
@@ -53,7 +57,7 @@ suspend fun exchangeNpssoForAccessCode(
     if (locationHeader == null || !locationHeader.contains("?code=")) {
         error(
             "There was a problem retrieving your PSN access code. Is your NPSSO code valid?\n" +
-                    "To get a new NPSSO code, visit https://ca.account.sony.com/api/v1/ssocookie.",
+                "To get a new NPSSO code, visit https://ca.account.sony.com/api/v1/ssocookie.",
         )
     }
 
@@ -63,10 +67,11 @@ suspend fun exchangeNpssoForAccessCode(
         redirectPart.split("&").associate {
             val (key, value) = it.split("=", limit = 2)
 
-            key to URLDecoder.decode(
-                value,
-                StandardCharsets.UTF_8,
-            )
+            key to
+                URLDecoder.decode(
+                    value,
+                    StandardCharsets.UTF_8,
+                )
         }
 
     return redirectParams["code"]
@@ -140,8 +145,7 @@ private fun formData(vararg pairs: Pair<String, String>): String =
         "${encode(key)}=${encode(value)}"
     }
 
-private fun encode(value: String): String =
-    URLEncoder.encode(value, StandardCharsets.UTF_8)
+private fun encode(value: String): String = URLEncoder.encode(value, StandardCharsets.UTF_8)
 
 private fun parseAuthTokensResponse(json: String): AuthTokensResponse {
     val mapper = jacksonObjectMapper()
@@ -165,4 +169,15 @@ private fun parseAuthTokensResponse(json: String): AuthTokensResponse {
         scope = raw["scope"] as String,
         tokenType = raw["token_type"] as String,
     )
+}
+
+suspend fun authenticate(
+    config: IntegrationsConfig,
+    client: HttpClient,
+) {
+    val authCode = exchangeNpssoForAccessCode(config.PSN_API_KEY, client)
+    val tokens = exchangeAccessCodeForToken(authCode, client)
+
+    config.authTokens = tokens
+    config.tokenExpiresAt = System.currentTimeMillis() + tokens.expiresIn * 1000
 }
