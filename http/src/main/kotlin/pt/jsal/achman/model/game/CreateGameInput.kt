@@ -6,4 +6,5 @@ data class CreateGameInput(
     val externalGameId: String,
     val name: String,
     val source: GameSource,
+    val cover: String,
 )

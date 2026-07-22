@@ -36,7 +36,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `createUserGame returns userGame with correct fields`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val userGame = repoUserGames.createUserGame(user.id, game.id, true)
             assertEquals(user.id, userGame.userId)
@@ -48,7 +48,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `createUserGame persists to findById`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
             val found = repoUserGames.findById(userGame.id)
@@ -63,7 +63,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `createUserGame persists to findAll`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
             repoUserGames.createUserGame(user.id, g1.id, false)
@@ -89,8 +89,8 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `findByUserId returns all games for a user`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.USER)
             val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
             val ug1 = repoUserGames.createUserGame(u1.id, g1.id, false)
@@ -106,7 +106,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `findByUserId returns empty when user has no games`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             assertEquals(emptyList(), repoUserGames.findByUserId(user.id))
         }
     }
@@ -114,7 +114,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `findByUserIdAndGameId returns correct entry`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
             val found = repoUserGames.findByUserIdAndGameId(user.id, game.id)
@@ -126,7 +126,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `findByUserIdAndGameId returns null when userId does not match`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             repoUserGames.createUserGame(user.id, game.id, false)
             assertNull(repoUserGames.findByUserIdAndGameId(999, game.id))
@@ -136,7 +136,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `findByUserIdAndGameId returns null when gameId does not match`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             repoUserGames.createUserGame(user.id, game.id, false)
             assertNull(repoUserGames.findByUserIdAndGameId(user.id, 999))
@@ -146,7 +146,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `alterSyncOption toggles synchronize from false to true`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
@@ -160,7 +160,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `alterSyncOption toggles synchronize from true to false`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             val userGame = repoUserGames.createUserGame(user.id, game.id, true)
@@ -174,7 +174,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `alterSyncOption persists change`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
@@ -189,7 +189,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `alterSyncOption does not duplicate userGame`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
@@ -203,7 +203,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `alterSyncOption only affects the correct userGame`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
 
@@ -223,7 +223,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `alterSyncOption toggling twice returns to original value`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
@@ -238,8 +238,8 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `removeUserGames removes all games for a user`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.USER)
 
             val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
@@ -261,8 +261,8 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `removeUserGames does not affect other users`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.USER)
 
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
 
@@ -278,7 +278,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `removeUserGames on user with no games does nothing`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
 
             repoUserGames.removeUserGames(user.id)
 
@@ -297,7 +297,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `save updates synchronize flag`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
             repoUserGames.save(userGame.copy(synchronize = true))
@@ -308,7 +308,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `save does not duplicate userGame`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
             repoUserGames.save(userGame.copy(synchronize = true))
@@ -319,7 +319,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `deleteById removes userGame`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
             repoUserGames.deleteById(userGame.id)
@@ -330,7 +330,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `deleteById only removes the correct userGame`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
             val ug1 = repoUserGames.createUserGame(user.id, g1.id, false)
@@ -344,7 +344,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `deleteById on nonexistent id does nothing`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
             repoUserGames.deleteById(999)
@@ -355,7 +355,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `deleting a user cascades to their userGames`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
             repoUsers.deleteById(user.id)
@@ -366,7 +366,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `deleting a game cascades to userGames`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val userGame = repoUserGames.createUserGame(user.id, game.id, false)
             repoGames.deleteById(game.id)
@@ -377,7 +377,7 @@ class RepositoryUserGamesJdbiTest {
     @Test
     fun `clear removes all userGames`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
             repoUserGames.createUserGame(user.id, g1.id, false)

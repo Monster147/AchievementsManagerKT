@@ -1,5 +1,7 @@
 package pt.jsal.achman
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.jdbi.v3.core.Jdbi
 import org.postgresql.ds.PGSimpleDataSource
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -40,7 +42,7 @@ class PipelineConfigurer(
 @Profile("mem")
 class InMemoryConfig {
     @Bean
-    fun trxManager(): TransactionManagerInMem = TransactionManagerInMem()
+    fun trxManager(objectMapper: ObjectMapper): TransactionManagerInMem = TransactionManagerInMem(objectMapper)
 }
 
 @Configuration
@@ -56,7 +58,7 @@ class JdbiConfig {
             ).configureWithAppRequirements()
 
     @Bean
-    fun trxManagerJdbi(jdbi: Jdbi): TransactionManagerJdbi = TransactionManagerJdbi(jdbi)
+    fun trxManagerJdbi(jdbi: Jdbi, objectMapper: ObjectMapper): TransactionManagerJdbi = TransactionManagerJdbi(jdbi, objectMapper)
 }
 
 @Configuration
@@ -72,6 +74,10 @@ class HttpClientConfig {
 
 @SpringBootApplication(scanBasePackages = ["pt.jsal.achman"])
 class WebApp {
+    @Bean
+    fun objectMapper(): ObjectMapper =
+        jacksonObjectMapper().findAndRegisterModules()
+
     @Bean
     fun passwordEncoder() = BCryptPasswordEncoder()
 

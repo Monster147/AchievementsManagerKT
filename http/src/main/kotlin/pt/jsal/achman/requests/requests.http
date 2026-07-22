@@ -1,4 +1,4 @@
-@token = NovgmnCel0UpOt8Deee8xXTaZuCX85fc29m25KkaA4M=
+@token = NioLQ-CXs2wRGFDN-TU8J82NIwYzEg1XshwYo4mjkdc=
 
 ### Create a new user
 POST http://localhost:8080/api/users
@@ -21,6 +21,11 @@ Content-Type: application/json
 
 ### Get user info
 GET http://localhost:8080/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Get user config
+GET http://localhost:8080/api/configs
 Content-Type: application/json
 Authorization: Bearer {{token}}
 

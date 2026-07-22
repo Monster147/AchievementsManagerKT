@@ -75,12 +75,10 @@ export function Login() {
                 password: state.password,
             });
 
-            console.log(response);
-
             await login(response.token);
 
             dispatch({ type: "success" });
-            navigate("/");
+            navigate("/", { replace: true });
         } catch (err) {
             if (err instanceof ApiError) {
                 dispatch({ type: "error", message: err.message });

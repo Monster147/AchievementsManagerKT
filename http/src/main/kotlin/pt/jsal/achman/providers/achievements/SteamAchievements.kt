@@ -1,5 +1,6 @@
 package pt.jsal.achman.providers.achievements
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.future.await
 import org.springframework.stereotype.Component
@@ -13,9 +14,8 @@ import java.net.http.HttpResponse
 @Component
 class SteamAchievements(
     private val client: HttpClient,
+    private val mapper: ObjectMapper
 ) {
-    private val mapper = jacksonObjectMapper()
-
     suspend fun getAchievements(
         config: IntegrationsConfig,
         externalGameId: String,

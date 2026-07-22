@@ -39,7 +39,7 @@ class AchievementServiceTest {
                 "user",
                 "user@mail",
                 PasswordValidationInfo("x"),
-                UserRole.NORMAL,
+                UserRole.USER,
             )
         }
 

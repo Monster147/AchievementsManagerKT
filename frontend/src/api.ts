@@ -20,6 +20,7 @@ import {IntegrationsConfig} from "./types/config/IntegrationsConfig.ts";
 import {UpdateIntegrationsConfigInput} from "./types/config/UpdatedIntegrationsConfigInput.ts";
 import {UserGameInput} from "./types/library/UserGameInput.ts";
 import {UserGame} from "./types/library/UserGame.ts";
+import {UserStats} from "./types/userstats/UserStats.ts";
 
 const API_BASE_URL = "/api";
 
@@ -114,9 +115,15 @@ export const api = {
         });
     },
 
+    async getUserStats(userId: number): Promise<UserStats>{
+        return fetchApi<UserStats>(`/stats/${userId}`, {
+            headers: getAuthHeaders(),
+        });
+    },
     // Games
 
     async createGame(input: CreateGameInput): Promise<Game> {
+        console.log("Body: ", JSON.stringify(input))
         return fetchApi<Game>("/games", {
             method: "POST",
             headers: getAuthHeaders(),
@@ -236,6 +243,7 @@ export const api = {
             {
                 method: "POST",
                 body: JSON.stringify(input),
+                headers: getAuthHeaders(),
             }
         );
     },
@@ -248,6 +256,7 @@ export const api = {
             {
                 method: "DELETE",
                 body: JSON.stringify(input),
+                headers: getAuthHeaders(),
             }
         );
     },
@@ -260,6 +269,7 @@ export const api = {
             {
                 method: "DELETE",
                 body: JSON.stringify(input),
+                headers: getAuthHeaders(),
             }
         );
     },
@@ -303,12 +313,20 @@ export const api = {
     // Configs
 
     async getConfigs(): Promise<IntegrationsConfig> {
-        return fetchApi<IntegrationsConfig>(
+        const config = await fetchApi<any>(
             "/configs",
             {
                 headers: getAuthHeaders(),
             }
         );
+
+        return {
+            steamApiKey: config.STEAM_API_KEY,
+            steamUserId: config.STEAM_USERID,
+            retroApiKey: config.RETRO_API_KEY,
+            retroUsername: config.RETRO_USERNAME,
+            psnApiKey: config.PSN_API_KEY,
+        };
     },
 
     async updateConfigs(

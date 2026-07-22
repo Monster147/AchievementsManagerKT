@@ -41,7 +41,7 @@ class GameServiceTest {
                 "user",
                 "user@mail",
                 PasswordValidationInfo("x"),
-                UserRole.NORMAL,
+                UserRole.USER,
             )
         }
 

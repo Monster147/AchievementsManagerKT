@@ -1,5 +1,6 @@
 package pt.jsal.achman
 
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import pt.jsal.achman.config.IntegrationsConfig
 import pt.jsal.achman.interfaces.TransactionManager
@@ -10,7 +11,8 @@ class IntegrationsConfigService(
 ) {
     fun getConfig(userId: Int): IntegrationsConfig =
         trxManager.run {
-            repoConfig.getConfig(userId)
+            val config = repoConfig.getConfig(userId)
+            config
         }
 
     fun updateConfig(

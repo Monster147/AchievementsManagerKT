@@ -73,7 +73,6 @@ export function useFetch<T>(
                     ...options,
                     signal: abortController.signal,
                 });
-                console.log("resposta", json);
                 if (!cancelled) {
                     dispatch({type: "success", payload: json, url: urlToUse});
                 }

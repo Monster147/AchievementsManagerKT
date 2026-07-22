@@ -159,7 +159,7 @@ class UserService(
                 return@run failure(UserError.AlreadyUsedEmailAddress)
             }
 
-            val player = repoUsers.createUser(name, email, passwordValidationInfo, UserRole.NORMAL)
+            val player = repoUsers.createUser(name, email, passwordValidationInfo, UserRole.USER)
             success(player)
         }
     }

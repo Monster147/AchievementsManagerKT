@@ -1,5 +1,6 @@
 package pt.jsal.achman.providers
 
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import pt.jsal.achman.config.IntegrationsConfig
 import pt.jsal.achman.game.GameSource
@@ -50,15 +51,19 @@ class SearchProvider(
 
     private fun addToCache(results: List<SearchedGame>) {
         results.forEachIndexed { index, game ->
+            val newIndex = index + 1
             val updatedGame =
                 game.copy(
-                    id = index,
+                    id = newIndex,
                 )
-            cache[index + 1] = updatedGame
+            cache[newIndex] = updatedGame
         }
     }
 
-    fun getCachedGame(id: Int): SearchedGame? = cache[id]
+    fun getCachedGame(id: Int): SearchedGame? {
+        val game = cache[id]
+        return game
+    }
 
     fun getCache(): List<SearchedGame> = cache.values.toList()
 }

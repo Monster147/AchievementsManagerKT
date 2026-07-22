@@ -1,5 +1,6 @@
 package pt.jsal.achman
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -13,10 +14,13 @@ import pt.jsal.achman.user.AuthenticatedUser
 @RequestMapping("/api/configs")
 class IntegrationsConfigController(
     private val integrationsConfigService: IntegrationsConfigService,
+    private val objectMapper: ObjectMapper,
 ) {
     @GetMapping
     fun getConfig(user: AuthenticatedUser): ResponseEntity<*> {
+        println(objectMapper)
         val config = integrationsConfigService.getConfig(user.user.id)
+        println("Objeto: " + objectMapper.writeValueAsString(config))
         return ResponseEntity.ok(config)
     }
 

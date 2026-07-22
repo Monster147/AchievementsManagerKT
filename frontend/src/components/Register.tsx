@@ -93,7 +93,7 @@ export function Register() {
             });
             await login(response.token);
             dispatch({type: "success"});
-            navigate("/");
+            navigate("/", { replace: true });
         } catch (e) {
             if (e instanceof ApiError) {
                 dispatch({type: "error", message: e.message})

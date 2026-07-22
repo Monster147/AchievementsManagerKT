@@ -7,6 +7,11 @@ import {Home} from "./components/Home.tsx";
 import {Login} from "./components/Login.tsx";
 import {Register} from "./components/Register.tsx";
 import {Layout} from "./components/Layout.tsx";
+import {ProtectedRoute} from "./components/ProtectedRoute.tsx";
+import {UserProfile} from "./components/UserProfile.tsx";
+import {SearchGames} from "./components/SearchGames.tsx";
+import {CreateGame} from "./components/CreateGame.tsx";
+import {GamesList} from "./components/GamesList.tsx";
 
 const router = createBrowserRouter([
     {
@@ -23,6 +28,34 @@ const router = createBrowserRouter([
             {
                 path: "/register",
                 element: <Register />
+            },
+            {
+                path: "/games",
+                element: <GamesList />
+            },
+            {
+                path: "/profile",
+                element: (
+                    <ProtectedRoute>
+                        <UserProfile/>
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: "/search-games",
+                element: (
+                    <ProtectedRoute>
+                        <SearchGames/>
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: "/create-game",
+                element: (
+                    <ProtectedRoute>
+                        <CreateGame/>
+                    </ProtectedRoute>
+                ),
             },
         ]
     },

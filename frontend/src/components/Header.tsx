@@ -1,18 +1,14 @@
-import {Link, useNavigate} from "react-router";
+import { Link } from "react-router";
 import { FaUserCircle } from "react-icons/fa";
 import {useAuth} from "../AuthContext.tsx";
 import {useState} from "react";
 
 export function Header() {
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
+    const { user } = useAuth();
 
-    const handleLogout = () => {
-        logout();
-        navigate("/login");
-    };
-
-    const [theme, setTheme] = useState("light");
+    const [theme, setTheme] = useState(() => {
+        return document.body.className || "light";
+    });
 
     const toggleTheme = () => {
         const next =
@@ -22,7 +18,7 @@ export function Header() {
                     ? "theme-dark-red"
                     : "light";
 
-        document.body.className = next;
+        document.body.className = next === "light" ? "" : next;
         setTheme(next);
     };
 
@@ -51,13 +47,6 @@ export function Header() {
                                 Bem-vindo, <strong>{user.name}</strong>
                             </span>
                         </Link>
-
-                        <button
-                            className="logout-button"
-                            onClick={handleLogout}
-                        >
-                            Logout
-                        </button>
                     </>
                 ) : (
                     <>

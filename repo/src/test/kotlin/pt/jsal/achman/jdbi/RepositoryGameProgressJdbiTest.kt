@@ -37,7 +37,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `createGameProgress returns progress with correct fields`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val progress = repoGameProgress.createGameProgress(user.id, game.id)
             assertEquals(user.id, progress.userId)
@@ -49,7 +49,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `createGameProgress persists to findById`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val progress = repoGameProgress.createGameProgress(user.id, game.id)
             val found = repoGameProgress.findById(progress.id)
@@ -77,7 +77,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `findByUserIdAndGameId returns correct progress`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val progress = repoGameProgress.createGameProgress(user.id, game.id)
             val found = repoGameProgress.findByUserIdAndGameId(user.id, game.id)
@@ -89,7 +89,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `findByUserIdAndGameId returns null when userId does not match`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             repoGameProgress.createGameProgress(user.id, game.id)
             assertNull(repoGameProgress.findByUserIdAndGameId(999, game.id))
@@ -99,7 +99,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `findByUserIdAndGameId returns null when gameId does not match`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             repoGameProgress.createGameProgress(user.id, game.id)
             assertNull(repoGameProgress.findByUserIdAndGameId(user.id, 999))
@@ -109,8 +109,8 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `findByUserId returns all progress for a user`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.USER)
             val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
             val p1 = repoGameProgress.createGameProgress(u1.id, g1.id)
@@ -126,7 +126,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `findByUserId returns empty when user has no progress`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             assertEquals(emptyList(), repoGameProgress.findByUserId(user.id))
         }
     }
@@ -134,7 +134,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `addCompletedAchievement adds achievement to progress`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             repoGameProgress.createGameProgress(user.id, game.id)
@@ -146,7 +146,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `addCompletedAchievement persists changes`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             repoGameProgress.createGameProgress(user.id, game.id)
@@ -159,7 +159,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `addCompletedAchievement does not duplicate achievements`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             repoGameProgress.createGameProgress(user.id, game.id)
@@ -172,7 +172,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `addCompletedAchievement creates progress if not exists`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             val updated = repoGameProgress.addCompletedAchievement(user.id, game.id, achievement.id)
@@ -184,8 +184,8 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `addCompletedAchievement does not affect other users progress`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             repoGameProgress.createGameProgress(u1.id, game.id)
@@ -199,7 +199,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `addCompletedAchievement can add multiple achievements`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val a1 = repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", game.id)
             val a2 = repoAchievements.createAchievement("api2", "Achievement 2", "icon2.png", "Desc 2", game.id)
@@ -216,7 +216,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `removeCompletedAchievement removes achievement from progress`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             repoGameProgress.createGameProgress(user.id, game.id)
@@ -229,7 +229,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `removeCompletedAchievement persists changes`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             repoGameProgress.createGameProgress(user.id, game.id)
@@ -243,7 +243,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `removeCompletedAchievement does nothing if achievement not present`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             repoGameProgress.createGameProgress(user.id, game.id)
             val updated = repoGameProgress.removeCompletedAchievement(user.id, game.id, 999)
@@ -254,7 +254,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `removeCompletedAchievement only removes correct achievement`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val a1 = repoAchievements.createAchievement("api1", "Achievement 1", "icon1.png", "Desc 1", game.id)
             val a2 = repoAchievements.createAchievement("api2", "Achievement 2", "icon2.png", "Desc 2", game.id)
@@ -270,8 +270,8 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `removeCompletedAchievement does not affect other users progress`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "Achievement", "icon.png", "Desc", game.id)
             repoGameProgress.createGameProgress(u1.id, game.id)
@@ -287,7 +287,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `clearCompletedAchievements removes all achievements`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val a1 = repoAchievements.createAchievement("api1", "A1", "icon1.png", "Desc", game.id)
             val a2 = repoAchievements.createAchievement("api2", "A2", "icon2.png", "Desc", game.id)
@@ -306,7 +306,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `clearCompletedAchievements persists changes`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "A1", "icon.png", "Desc", game.id)
 
@@ -324,8 +324,8 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `clearCompletedAchievements does not affect other users`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val achievement = repoAchievements.createAchievement("api1", "A1", "icon.png", "Desc", game.id)
 
@@ -346,7 +346,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `clearCompletedAchievements returns null when progress does not exist`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             val result = repoGameProgress.clearCompletedAchievements(user.id, game.id)
@@ -358,7 +358,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `clearCompletedAchievements on empty achievements keeps empty`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
 
             repoGameProgress.createGameProgress(user.id, game.id)
@@ -373,8 +373,8 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `removeUserProgress removes all progress for a user`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.USER)
 
             val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
@@ -396,8 +396,8 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `removeUserProgress does not affect other users`() {
         trxManager.run {
-            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
-            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.NORMAL)
+            val u1 = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
+            val u2 = repoUsers.createUser("Bob", "bob@gmail.com", PasswordValidationInfo("hash2"), UserRole.USER)
 
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
 
@@ -414,7 +414,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `removeUserProgress on user with no progress does nothing`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
 
             repoGameProgress.removeUserProgress(user.id)
 
@@ -425,7 +425,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `deleteById removes progress`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val progress = repoGameProgress.createGameProgress(user.id, game.id)
             repoGameProgress.deleteById(progress.id)
@@ -436,7 +436,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `deleteById only removes the correct progress`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
             val p1 = repoGameProgress.createGameProgress(user.id, g1.id)
@@ -450,7 +450,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `deleteById on nonexistent id does nothing`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val progress = repoGameProgress.createGameProgress(user.id, game.id)
             repoGameProgress.deleteById(999)
@@ -461,7 +461,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `deleting a user cascades to their game progress`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val progress = repoGameProgress.createGameProgress(user.id, game.id)
             repoUsers.deleteById(user.id)
@@ -472,7 +472,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `deleting a game cascades to game progress`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val game = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val progress = repoGameProgress.createGameProgress(user.id, game.id)
             repoGames.deleteById(game.id)
@@ -483,7 +483,7 @@ class RepositoryGameProgressJdbiTest {
     @Test
     fun `clear removes all progress`() {
         trxManager.run {
-            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.NORMAL)
+            val user = repoUsers.createUser("Alice", "alice@gmail.com", PasswordValidationInfo("hash"), UserRole.USER)
             val g1 = repoGames.createGame("3070", "Ratchet & Clank", GameSource.RETROACHIEVEMENTS, "cover.png")
             val g2 = repoGames.createGame("730", "CS2", GameSource.STEAM, "cover.png")
             repoGameProgress.createGameProgress(user.id, g1.id)

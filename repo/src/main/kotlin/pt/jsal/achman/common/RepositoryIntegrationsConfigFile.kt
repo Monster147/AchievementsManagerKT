@@ -1,6 +1,9 @@
 package pt.jsal.achman.common
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 import pt.jsal.achman.config.IntegrationsConfig
 import pt.jsal.achman.interfaces.RepositoryIntegrationConfig
 import java.nio.file.Files
@@ -9,9 +12,10 @@ import java.nio.file.StandardOpenOption
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-class RepositoryIntegrationsConfigFile : RepositoryIntegrationConfig {
-    private val objectMapper = ObjectMapper()
-
+@Component
+class RepositoryIntegrationsConfigFile(
+    private val objectMapper: ObjectMapper,
+) : RepositoryIntegrationConfig {
     private val lock = ReentrantLock()
 
     private fun path(userId: Int): Path = Path.of("config/users/$userId/integrations.json")
@@ -26,7 +30,8 @@ class RepositoryIntegrationsConfigFile : RepositoryIntegrationConfig {
 
             val json = Files.readString(file)
 
-            objectMapper.readValue(json, IntegrationsConfig::class.java)
+            val config = objectMapper.readValue(json, IntegrationsConfig::class.java)
+            config
         }
 
     override fun updateConfig(

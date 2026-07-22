@@ -1,6 +1,6 @@
 package pt.jsal.achman.providers.psnutils
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.future.await
 import pt.jsal.achman.config.AuthTokensResponse
 import pt.jsal.achman.config.IntegrationsConfig
@@ -81,6 +81,7 @@ suspend fun exchangeNpssoForAccessCode(
 suspend fun exchangeAccessCodeForToken(
     accessCode: String,
     client: HttpClient,
+    mapper: ObjectMapper,
 ): AuthTokensResponse {
     val requestUrl = "$PSN_AUTH_BASE_URL/token"
 
@@ -106,12 +107,13 @@ suspend fun exchangeAccessCodeForToken(
             HttpResponse.BodyHandlers.ofString(),
         ).await()
 
-    return parseAuthTokensResponse(response.body())
+    return parseAuthTokensResponse(response.body(), mapper)
 }
 
 suspend fun exchangeRefreshTokenForAuthTokens(
     refreshToken: String,
     client: HttpClient,
+    mapper: ObjectMapper
 ): AuthTokensResponse {
     val requestUrl = "$PSN_AUTH_BASE_URL/token"
 
@@ -137,7 +139,7 @@ suspend fun exchangeRefreshTokenForAuthTokens(
             HttpResponse.BodyHandlers.ofString(),
         ).await()
 
-    return parseAuthTokensResponse(response.body())
+    return parseAuthTokensResponse(response.body(), mapper)
 }
 
 private fun formData(vararg pairs: Pair<String, String>): String =
@@ -147,9 +149,7 @@ private fun formData(vararg pairs: Pair<String, String>): String =
 
 private fun encode(value: String): String = URLEncoder.encode(value, StandardCharsets.UTF_8)
 
-private fun parseAuthTokensResponse(json: String): AuthTokensResponse {
-    val mapper = jacksonObjectMapper()
-
+private fun parseAuthTokensResponse(json: String, mapper: ObjectMapper): AuthTokensResponse {
     val raw: Map<String, Any> =
         mapper.readValue(
             json,
@@ -174,9 +174,10 @@ private fun parseAuthTokensResponse(json: String): AuthTokensResponse {
 suspend fun authenticate(
     config: IntegrationsConfig,
     client: HttpClient,
+    mapper: ObjectMapper
 ) {
     val authCode = exchangeNpssoForAccessCode(config.PSN_API_KEY, client)
-    val tokens = exchangeAccessCodeForToken(authCode, client)
+    val tokens = exchangeAccessCodeForToken(authCode, client, mapper)
 
     config.authTokens = tokens
     config.tokenExpiresAt = System.currentTimeMillis() + tokens.expiresIn * 1000

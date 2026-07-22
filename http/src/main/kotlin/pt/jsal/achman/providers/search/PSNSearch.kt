@@ -1,5 +1,6 @@
 package pt.jsal.achman.providers.search
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.future.await
 import org.springframework.stereotype.Component
@@ -19,9 +20,8 @@ import java.net.http.HttpResponse
 class PSNSearch(
     private val client: HttpClient,
     private val trxManager: TransactionManager,
+    private val mapper: ObjectMapper
 ) {
-    private val mapper = jacksonObjectMapper()
-
     suspend fun searchGames(
         userId: Int,
         config: IntegrationsConfig,
@@ -94,8 +94,9 @@ class PSNSearch(
                     exchangeRefreshTokenForAuthTokens(
                         refreshToken,
                         client,
+                        mapper,
                     )
-            } ?: authenticate(config, client)
+            } ?: authenticate(config, client, mapper)
 
             trxManager.run {
                 repoConfig.updateConfig(

@@ -38,7 +38,7 @@ class UserGamesServiceTest {
                     "user",
                     "user@mail",
                     PasswordValidationInfo("hash"),
-                    UserRole.NORMAL,
+                    UserRole.USER,
                 ).id
 
             gameId =

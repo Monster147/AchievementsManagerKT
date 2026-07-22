@@ -1,7 +1,9 @@
 package pt.jsal.achman.providers.achievements
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.future.await
+import org.springframework.beans.factory.ObjectFactory
 import org.springframework.stereotype.Component
 import pt.jsal.achman.achievement.Achievement
 import pt.jsal.achman.config.IntegrationsConfig
@@ -18,9 +20,8 @@ import java.net.http.HttpResponse
 class PSNAchievements(
     private val client: HttpClient,
     private val trxManager: TransactionManager,
+    private val mapper: ObjectMapper
 ) {
-    private val mapper = jacksonObjectMapper()
-
     suspend fun getAchievements(
         userId: Int,
         config: IntegrationsConfig,
@@ -84,8 +85,9 @@ class PSNAchievements(
                     exchangeRefreshTokenForAuthTokens(
                         refreshToken,
                         client,
+                        mapper,
                     )
-            } ?: authenticate(config, client)
+            } ?: authenticate(config, client, mapper)
 
             trxManager.run {
                 repoConfig.updateConfig(
