@@ -97,6 +97,7 @@ class GameProgressController(
 
     @PostMapping("/achievement")
     fun addCompletedAchievement(
+        user: AuthenticatedUser,
         @RequestBody input: CompletedAchievementInput,
     ): ResponseEntity<*> {
         val result =
@@ -130,6 +131,7 @@ class GameProgressController(
 
     @DeleteMapping("/achievement")
     fun removeCompletedAchievement(
+        user: AuthenticatedUser,
         @RequestBody input: CompletedAchievementInput,
     ): ResponseEntity<*> {
         val result =
@@ -163,6 +165,7 @@ class GameProgressController(
 
     @DeleteMapping
     fun clearCompletedAchievements(
+        user: AuthenticatedUser,
         @RequestBody input: ClearCompletedAchievements,
     ): ResponseEntity<*> {
         val result =

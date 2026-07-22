@@ -97,6 +97,7 @@ class UserController(
                     userAuthenticatedUser.user.id,
                     userAuthenticatedUser.user.name,
                     userAuthenticatedUser.user.email,
+                    userAuthenticatedUser.user.role,
                 ),
             )
 }

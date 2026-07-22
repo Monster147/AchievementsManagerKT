@@ -15,7 +15,7 @@ class RepositoryUserMem : RepositoryUser {
                 id = 1,
                 "Admin",
                 "admin@gmail.com",
-                PasswordValidationInfo("\$2a\$10\$Qocu8dzhoaDmwTRMtJCvfuW4HD9RLBTWZ.pGYLlxvmmF/k2BfmX1C"),
+                PasswordValidationInfo("\$2a\$10\$16M.ecllnjRe.0LPEw.u2OPwOb3x1eZmzfKYRMtVCgstALwYeenzC"),
                 role = UserRole.ADMIN,
             ),
         )

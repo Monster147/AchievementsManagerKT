@@ -1,4 +1,4 @@
-package pt.achman
+package pt.jsal.achman
 
 import org.jdbi.v3.core.Jdbi
 import org.postgresql.ds.PGSimpleDataSource
@@ -8,6 +8,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.web.method.support.HandlerMethodArgumentResolver
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import pt.jsal.achman.http.AuthenticatedUserArgumentResolver
+import pt.jsal.achman.http.AuthenticationInterceptor
 import pt.jsal.achman.jdbi.TransactionManagerJdbi
 import pt.jsal.achman.jdbi.configureWithAppRequirements
 import pt.jsal.achman.mem.TransactionManagerInMem
@@ -16,6 +21,20 @@ import pt.jsal.achman.user.UsersDomainConfig
 import java.net.http.HttpClient
 import java.time.Clock
 import java.time.Duration
+
+@Configuration
+class PipelineConfigurer(
+    val authenticationInterceptor: AuthenticationInterceptor,
+    val authenticatedUserArgumentResolver: AuthenticatedUserArgumentResolver,
+) : WebMvcConfigurer {
+    override fun addInterceptors(registry: InterceptorRegistry) {
+        registry.addInterceptor(authenticationInterceptor)
+    }
+
+    override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
+        resolvers.add(authenticatedUserArgumentResolver)
+    }
+}
 
 @Configuration
 @Profile("mem")
@@ -51,7 +70,7 @@ class HttpClientConfig {
             .build()
 }
 
-@SpringBootApplication(scanBasePackages = ["pt.achman"])
+@SpringBootApplication(scanBasePackages = ["pt.jsal.achman"])
 class WebApp {
     @Bean
     fun passwordEncoder() = BCryptPasswordEncoder()

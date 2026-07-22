@@ -1,4 +1,4 @@
-package pt.achman
+package pt.jsal.achman
 
 object Environment {
     fun getDbUrl() = System.getenv(KEY_DB_URL)

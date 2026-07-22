@@ -55,4 +55,6 @@ sealed class Problem(
 
     // getAchievement
     data object NoAchievementFound : Problem(URI("${PROBLEM_URI_PATH}/no-achievement-found"))
+
+    data object InvalidRequestContent : Problem(URI("${PROBLEM_URI_PATH}/invalid-request-content"))
 }

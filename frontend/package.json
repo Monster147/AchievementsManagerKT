@@ -1,0 +1,34 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "Frontend for the kotlin version of achievements manager",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Monster147/AchievementsManagerKT.git"
+  },
+  "author": "José Saldanha",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Monster147/AchievementsManagerKT/issues"
+  },
+  "homepage": "https://github.com/Monster147/AchievementsManagerKT#readme",
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-icons": "^5.7.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "react-router": "^7.14.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.5"
+  }
+}

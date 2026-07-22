@@ -3,7 +3,701 @@ info:
   title: AchievementManagerKT
   description: An achievement manager for games, written in Kotlin.
   version: 1.0.0
+
 servers:
   - url: http://localhost:8080/api
+
+tags:
+  - name: Users
+  - name: Games
+  - name: Achievements
+  - name: Progress
+  - name: Library
+  - name: Configs
+  - name: Search
+
 paths:
-  
+
+  /users:
+    post:
+      tags:
+        - Users
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '201':
+          description: User created
+        '400':
+          description: Invalid input
+
+  /users/login:
+    post:
+      tags:
+        - Users
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginInputModel'
+      responses:
+        '201':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLoginOutputModel'
+        '400':
+          description: Invalid credentials
+
+  /users/logout:
+    post:
+      tags:
+        - Users
+      summary: Logout user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logged out
+
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Get authenticated user info
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserHomeOutputModel'
+
+  /games:
+    post:
+      tags:
+        - Games
+      summary: Create a game
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGameInput'
+      responses:
+        '201':
+          description: Game created
+        '403':
+          description: User not admin
+        '409':
+          description: Game already exists
+
+    get:
+      tags:
+        - Games
+      summary: Get all games
+      responses:
+        '200':
+          description: List of games
+
+  /games/{gameId}:
+    get:
+      tags:
+        - Games
+      summary: Get game by id
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Game found
+        '404':
+          description: Game not found
+
+    delete:
+      tags:
+        - Games
+      summary: Delete game
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Game deleted
+        '404':
+          description: Game not found
+
+  /games/update/{gameId}:
+    post:
+      tags:
+        - Games
+      summary: Update game
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGameInput'
+      responses:
+        '200':
+          description: Game updated
+        '404':
+          description: Game not found
+
+  /games/externalId/{externalId}/source/{source}:
+    get:
+      tags:
+        - Games
+      summary: Find game by external id and source
+      parameters:
+        - in: path
+          name: externalId
+          required: true
+          schema:
+            type: string
+
+        - in: path
+          name: source
+          required: true
+          schema:
+            $ref: '#/components/schemas/GameSource'
+
+      responses:
+        '200':
+          description: Game found
+        '404':
+          description: Game not found
+
+  /achievements:
+    post:
+      tags:
+        - Achievements
+      summary: Create achievement
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAchievementInput'
+      responses:
+        '201':
+          description: Achievement created
+        '403':
+          description: User not admin
+
+  /achievements/{gameId}:
+    get:
+      tags:
+        - Achievements
+      summary: Get achievements by game id
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Achievements found
+
+    delete:
+      tags:
+        - Achievements
+      summary: Remove achievements from game
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Achievements removed
+
+  /getAchievements:
+    post:
+      tags:
+        - Achievements
+      summary: Fetch achievements from external provider
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAchievementInput'
+      responses:
+        '200':
+          description: Achievements fetched
+        '404':
+          description: No achievements found
+
+  /progress/{gameId}:
+    post:
+      tags:
+        - Progress
+      summary: Create game progress
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGameProgressInput'
+      responses:
+        '201':
+          description: Progress created
+
+  /progress/game/{gameId}/user/{userId}:
+    get:
+      tags:
+        - Progress
+      summary: Get progress by game and user
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: integer
+
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: Progress found
+
+  /progress/user/{userId}:
+    get:
+      tags:
+        - Progress
+      summary: Get all progress by user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User progress list
+
+  /progress/achievement:
+    post:
+      tags:
+        - Progress
+      summary: Add completed achievement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompletedAchievementInput'
+      responses:
+        '200':
+          description: Achievement added
+
+    delete:
+      tags:
+        - Progress
+      summary: Remove completed achievement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompletedAchievementInput'
+      responses:
+        '200':
+          description: Achievement removed
+
+  /progress:
+    delete:
+      tags:
+        - Progress
+      summary: Clear completed achievements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClearCompletedAchievements'
+      responses:
+        '200':
+          description: Completed achievements cleared
+
+  /searchGames:
+    post:
+      tags:
+        - Search
+      summary: Search games from external provider
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchGameRequest'
+      responses:
+        '200':
+          description: Search results
+        '404':
+          description: No games found
+
+  /searchGames/cache:
+    post:
+      tags:
+        - Search
+      summary: Get cached search games
+      responses:
+        '200':
+          description: Cache retrieved
+
+  /searchGames/addGame/{cacheGameId}:
+    post:
+      tags:
+        - Search
+      summary: Add game from cache
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: cacheGameId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Game added from cache
+
+  /configs:
+    get:
+      tags:
+        - Configs
+      summary: Get integrations config
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Config retrieved
+
+    post:
+      tags:
+        - Configs
+      summary: Update integrations config
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIntegrationsConfigInput'
+      responses:
+        '200':
+          description: Config updated
+
+  /library:
+    post:
+      tags:
+        - Library
+      summary: Add game to user library
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGameInput'
+      responses:
+        '200':
+          description: Game added to library
+
+  /library/{userId}:
+    get:
+      tags:
+        - Library
+      summary: Get user library
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User library retrieved
+
+  /library/user/{userId}/game/{gameId}:
+    get:
+      tags:
+        - Library
+      summary: Get specific game from user library
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: User game found
+
+  /library/user/game/{gameId}/updateSync:
+    post:
+      tags:
+        - Library
+      summary: Toggle sync option for user game
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sync option updated
+
+  /library/user:
+    delete:
+      tags:
+        - Library
+      summary: Remove all user games
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: User games removed
+
+  /library/user/game/{gameId}:
+    delete:
+      tags:
+        - Library
+      summary: Remove game from library
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Game removed from library
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    UserInput:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - name
+        - email
+        - password
+
+    UserLoginInputModel:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    UserLoginOutputModel:
+      type: object
+      properties:
+        token:
+          type: string
+
+    UserHomeOutputModel:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+
+    CreateGameInput:
+      type: object
+      properties:
+        externalGameId:
+          type: string
+        name:
+          type: string
+        source:
+          $ref: '#/components/schemas/GameSource'
+
+    UpdateGameInput:
+      type: object
+      properties:
+        externalGameId:
+          type: string
+        name:
+          type: string
+        genres:
+          type: array
+          items:
+            type: string
+        platform:
+          type: string
+        releaseYear:
+          type: integer
+        source:
+          $ref: '#/components/schemas/GameSource'
+        cover:
+          type: string
+
+    CreateAchievementInput:
+      type: object
+      properties:
+        gameId:
+          type: integer
+        apiName:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+
+    CreateGameProgressInput:
+      type: object
+      properties:
+        gameId:
+          type: integer
+
+    CompletedAchievementInput:
+      type: object
+      properties:
+        userId:
+          type: integer
+        gameId:
+          type: integer
+        achievementId:
+          type: integer
+
+    ClearCompletedAchievements:
+      type: object
+      properties:
+        userId:
+          type: integer
+        gameId:
+          type: integer
+
+    SearchGameRequest:
+      type: object
+      properties:
+        gameName:
+          type: string
+        source:
+          $ref: '#/components/schemas/GameSource'
+
+    GetAchievementInput:
+      type: object
+      properties:
+        internalGameId:
+          type: integer
+        externalGameId:
+          type: string
+        source:
+          $ref: '#/components/schemas/GameSource'
+
+    UpdateIntegrationsConfigInput:
+      type: object
+      properties:
+        steamApiKey:
+          type: string
+        steamUserId:
+          type: string
+        retroApiKey:
+          type: string
+        retroUsername:
+          type: string
+        psnApiKey:
+          type: string
+
+    UserGameInput:
+      type: object
+      properties:
+        gameId:
+          type: integer
+
+    GameSource:
+      type: string
+      enum:
+        - STEAM
+        - RETROACHIEVEMENTS
+        - PSN
