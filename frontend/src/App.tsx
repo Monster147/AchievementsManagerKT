@@ -12,6 +12,7 @@ import {UserProfile} from "./components/UserProfile.tsx";
 import {SearchGames} from "./components/SearchGames.tsx";
 import {CreateGame} from "./components/CreateGame.tsx";
 import {GamesList} from "./components/GamesList.tsx";
+import {EditGame} from "./components/EditGame.tsx";
 
 const router = createBrowserRouter([
     {
@@ -54,6 +55,14 @@ const router = createBrowserRouter([
                 element: (
                     <ProtectedRoute>
                         <CreateGame/>
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: "/games/:id/edit",
+                element: (
+                    <ProtectedRoute>
+                        <EditGame/>
                     </ProtectedRoute>
                 ),
             },

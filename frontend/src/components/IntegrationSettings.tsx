@@ -148,21 +148,11 @@ export function IntegrationSettings() {
 
     return (
         <section className="stats-section">
-            <h3 className="section-title">
-                Integrations
-            </h3>
-
-            <form
-                className="auth-form"
-                onSubmit={handleSubmit}
-            >
+            <h3 className="section-title">Integrations</h3>
+            <form className="auth-form" onSubmit={handleSubmit}>
                 <h4>Steam</h4>
-
                 <div className="form-group">
-                    <label htmlFor="steamApiKey">
-                        Steam API Key
-                    </label>
-
+                    <label htmlFor="steamApiKey">Steam API Key</label>
                     <input
                         id="steamApiKey"
                         value={state.steamApiKey}
@@ -175,12 +165,8 @@ export function IntegrationSettings() {
                         }
                     />
                 </div>
-
                 <div className="form-group">
-                    <label htmlFor="steamUserId">
-                        Steam User ID
-                    </label>
-
+                    <label htmlFor="steamUserId">Steam User ID</label>
                     <input
                         id="steamUserId"
                         value={state.steamUserId}
@@ -193,14 +179,9 @@ export function IntegrationSettings() {
                         }
                     />
                 </div>
-
                 <h4>RetroAchievements</h4>
-
                 <div className="form-group">
-                    <label htmlFor="retroApiKey">
-                        API Key
-                    </label>
-
+                    <label htmlFor="retroApiKey">API Key</label>
                     <input
                         id="retroApiKey"
                         value={state.retroApiKey}
@@ -213,12 +194,8 @@ export function IntegrationSettings() {
                         }
                     />
                 </div>
-
                 <div className="form-group">
-                    <label htmlFor="retroUsername">
-                        Username
-                    </label>
-
+                    <label htmlFor="retroUsername">Username</label>
                     <input
                         id="retroUsername"
                         value={state.retroUsername}
@@ -231,14 +208,9 @@ export function IntegrationSettings() {
                         }
                     />
                 </div>
-
                 <h4>PlayStation Network</h4>
-
                 <div className="form-group">
-                    <label htmlFor="psnApiKey">
-                        API Key
-                    </label>
-
+                    <label htmlFor="psnApiKey">API Key</label>
                     <input
                         id="psnApiKey"
                         value={state.psnApiKey}
@@ -251,13 +223,11 @@ export function IntegrationSettings() {
                         }
                     />
                 </div>
-
                 {state.error && (
                     <div className="form-error">
                         {state.error}
                     </div>
                 )}
-
                 <button
                     className="create-game-button"
                     type="submit"

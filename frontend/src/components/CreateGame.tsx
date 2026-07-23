@@ -37,7 +37,6 @@ function reduce(
     action: CreateGameAction,
 ): CreateGameState {
     switch (action.type) {
-
         case "input-change":
             return {
                 ...state,
@@ -84,22 +83,15 @@ const initialState: CreateGameState = {
 };
 
 export function CreateGame() {
-
-    const [state, dispatch] =
-        useReducer(reduce, initialState);
-
+    const [state, dispatch] = useReducer(reduce, initialState);
     const navigate = useNavigate();
-
     const handleSubmit = async (
         e: React.FormEvent,
     ) => {
-
         e.preventDefault();
-
         dispatch({
             type: "post",
         });
-
         try {
             await api.createGame({
                 name: state.name,
@@ -107,15 +99,12 @@ export function CreateGame() {
                 source: state.source,
                 cover: state.cover || undefined,
             });
-
             dispatch({
                 type: "success",
             });
-
             navigate("/games");
 
         } catch (e) {
-
             dispatch({
                 type: "error",
                 message:
@@ -123,9 +112,7 @@ export function CreateGame() {
                         ? e.message
                         : "Failed to create game.",
             });
-
         }
-
     };
 
     return (
@@ -140,14 +127,9 @@ export function CreateGame() {
                         database.
                     </p>
                 </div>
-                <form
-                    className="auth-form"
-                    onSubmit={handleSubmit}
-                >
+                <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label>
-                            Game Name
-                        </label>
+                        <label>Game Name</label>
                         <input
                             value={state.name}
                             placeholder="Minecraft"
@@ -164,9 +146,7 @@ export function CreateGame() {
                         />
                     </div>
                     <div className="form-group">
-                        <label>
-                            External Game Id
-                        </label>
+                        <label>External Game Id</label>
                         <input
                             value={state.externalGameId}
                             placeholder="minecraft"
@@ -183,9 +163,7 @@ export function CreateGame() {
                         />
                     </div>
                     <div className="form-group">
-                        <label>
-                            Source
-                        </label>
+                        <label>Source</label>
                         <select
                             value={state.source}
                             onChange={(e) =>
@@ -201,29 +179,15 @@ export function CreateGame() {
                                 })
                             }
                         >
-                            <option value={GameSource.STEAM}>
-                                Steam
-                            </option>
-                            <option value={GameSource.PSN}>
-                                PlayStation
-                            </option>
-                            <option
-                                value={
-                                    GameSource.RETROACHIEVEMENTS
-                                }
-                            >
+                            <option value={GameSource.STEAM}>Steam</option>
+                            <option value={GameSource.PSN}>PlayStation</option>
+                            <option value={GameSource.RETROACHIEVEMENTS}>
                                 RetroAchievements
                             </option>
                         </select>
-
                     </div>
-
                     <div className="form-group">
-
-                        <label>
-                            Cover URL
-                        </label>
-
+                        <label>Cover URL</label>
                         <input
                             value={state.cover}
                             placeholder="https://..."
@@ -238,15 +202,12 @@ export function CreateGame() {
                                 })
                             }
                         />
-
                     </div>
-
                     {state.error && (
                         <div className="form-error">
                             {state.error}
                         </div>
                     )}
-
                     <button
                         className="create-game-button"
                         disabled={
@@ -257,11 +218,8 @@ export function CreateGame() {
                             ? "Creating..."
                             : "Create Game"}
                     </button>
-
                 </form>
-
             </div>
-
         </div>
     );
 }

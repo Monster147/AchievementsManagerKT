@@ -118,9 +118,7 @@ export function SearchGames() {
         e: React.FormEvent,
     ) => {
         e.preventDefault();
-
         dispatch({ type: "search" });
-
         try {
             await api.searchGames({
                 gameName: state.gameName,
@@ -164,18 +162,11 @@ export function SearchGames() {
 
     return (
         <div className="search-page">
-
             <div className="search-card">
-
                 <h1>Search Games</h1>
-
-                <form
-                    className="search-form"
-                    onSubmit={handleSearch}
-                >
+                <form className="search-form" onSubmit={handleSearch}>
                     <div className="form-group">
                         <label>Game Name</label>
-
                         <input
                             value={state.gameName}
                             onChange={(e) =>
@@ -189,10 +180,8 @@ export function SearchGames() {
                             required
                         />
                     </div>
-
                     <div className="form-group">
                         <label>Platform</label>
-
                         <select
                             value={state.source}
                             onChange={(e) =>
@@ -205,16 +194,10 @@ export function SearchGames() {
                                 })
                             }
                         >
-                            <option value={GameSource.STEAM}>
-                                Steam
-                            </option>
-
-                            <option value={GameSource.PSN}>
-                                PlayStation
-                            </option>
+                            <option value={GameSource.STEAM}>Steam</option>
+                            <option value={GameSource.PSN}>PlayStation</option>
                         </select>
                     </div>
-
                     <button
                         className="search-button"
                         disabled={
@@ -228,20 +211,14 @@ export function SearchGames() {
                             : "Search"}
                     </button>
                 </form>
-
                 {state.error && (
                     <div className="form-error">
                         {state.error}
                     </div>
                 )}
-
                 <div className="search-results">
-
                     {state.results.map(game => (
-                        <div
-                            key={game.id}
-                            className="search-result-card"
-                        >
+                        <div key={game.id} className="search-result-card">
                             <img
                                 src={
                                     game.cover ??
@@ -249,13 +226,10 @@ export function SearchGames() {
                                 }
                                 alt={game.name}
                             />
-
                             <div className="search-result-info">
                                 <h3>{game.name}</h3>
-
                                 <p>{game.source}</p>
                             </div>
-
                             <button
                                 className="create-game-button"
                                 onClick={() =>
@@ -268,9 +242,7 @@ export function SearchGames() {
                             </button>
                         </div>
                     ))}
-
                 </div>
-
             </div>
         </div>
     );

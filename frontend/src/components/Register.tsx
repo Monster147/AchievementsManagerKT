@@ -26,12 +26,14 @@ function reduce(state: RegisterState, action: RegisterAction): RegisterState {
                 email: action.email,
                 password: action.password,
             };
+
         case "post":
             return {
                 ...state,
                 stage: "posting",
                 error: undefined,
             };
+
         case "success":
             return {
                 name: "",
@@ -40,12 +42,14 @@ function reduce(state: RegisterState, action: RegisterAction): RegisterState {
                 error: undefined,
                 stage: "succeed",
             };
+
         case "error":
             return {
                 ...state,
                 stage: "failed",
                 error: action.message,
             };
+
         default:
             return state;
     }
@@ -67,7 +71,6 @@ export function Register() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         dispatch({type: "post"});
-
         try {
             await api.createUser({
                 name: state.name,
@@ -85,7 +88,6 @@ export function Register() {
             }
             return;
         }
-
         try {
             const response = await api.createToken({
                 email: state.email,
@@ -110,26 +112,16 @@ export function Register() {
         <div className="auth-page">
             <div className="auth-card register-card">
                 <div className="auth-header">
-                    <h1 className="auth-title">
-                        Criar Conta
-                    </h1>
-
+                    <h1 className="auth-title">Criar Conta</h1>
                     <p className="auth-description">
                         Preenche os dados para criares
                         a tua conta e começares a
                         acompanhar as tuas conquistas.
                     </p>
                 </div>
-
-                <form
-                    className="auth-form"
-                    onSubmit={handleSubmit}
-                >
+                <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label htmlFor="name">
-                            Nome de Utilizador
-                        </label>
-
+                        <label htmlFor="name">Nome de Utilizador</label>
                         <input
                             id="name"
                             type="text"
@@ -148,12 +140,8 @@ export function Register() {
                             autoComplete="name"
                         />
                     </div>
-
                     <div className="form-group">
-                        <label htmlFor="email">
-                            Endereço de email
-                        </label>
-
+                        <label htmlFor="email">Endereço de email</label>
                         <input
                             id="email"
                             type="email"
@@ -172,12 +160,8 @@ export function Register() {
                             autoComplete="email"
                         />
                     </div>
-
                     <div className="form-group">
-                        <label htmlFor="password">
-                            Palavra-passe
-                        </label>
-
+                        <label htmlFor="password">Palavra-passe</label>
                         <input
                             id="password"
                             type="password"
@@ -196,13 +180,11 @@ export function Register() {
                             autoComplete="new-password"
                         />
                     </div>
-
                     {state.error && (
                         <div className="form-error">
                             {state.error}
                         </div>
                     )}
-
                     <button
                         className="register-button"
                         type="submit"
@@ -213,16 +195,9 @@ export function Register() {
                             : "Criar Conta"}
                     </button>
                 </form>
-
                 <div className="auth-footer">
-                    <span>
-                        Já tens conta?
-                    </span>
-
-                    <Link
-                        className="login-button"
-                        to="/login"
-                    >
+                    <span>Já tens conta?</span>
+                    <Link className="login-button" to="/login">
                         Iniciar sessão
                     </Link>
                 </div>

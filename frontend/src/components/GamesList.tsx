@@ -1,9 +1,11 @@
-import { useEffect, useReducer } from "react";
-import { useAuth } from "../AuthContext";
-import { api, ApiError } from "../api";
-import { Game } from "../types/game/Game";
-import { GameSource } from "../types/game/GameSource";
+import {useEffect, useReducer} from "react";
+import {useAuth} from "../AuthContext";
+import {api, ApiError} from "../api";
+import {Game} from "../types/game/Game";
+import {GameSource} from "../types/game/GameSource";
 import {formatGameSource} from "../utils/formatGameSource.ts";
+import {UserRole} from "../types/user/UserRole.ts";
+import {Link} from "react-router";
 
 type ViewMode = "grid" | "list";
 
@@ -48,7 +50,6 @@ function applyFilters(
     source: "ALL" | GameSource,
 ): Game[] {
     return games.filter(game => {
-
         const matchesName =
             game.name
                 .toLowerCase()
@@ -66,9 +67,7 @@ function reduce(
     state: GamesState,
     action: GamesAction,
 ): GamesState {
-
     switch (action.type) {
-
         case "load":
             return {
                 ...state,
@@ -139,9 +138,8 @@ const initialState: GamesState = {
 
 export function GamesList() {
     const { user } = useAuth();
-
-    const [state, dispatch] =
-        useReducer(reduce, initialState);
+    const [state, dispatch] = useReducer(reduce, initialState);
+    const isUserAdmin = user?.role === UserRole.ADMIN;
 
     useEffect(() => {
         dispatch({
@@ -163,7 +161,6 @@ export function GamesList() {
                             : "Failed to load games.",
                 }),
             );
-
     }, []);
 
     const handleAddGame = async (
@@ -183,7 +180,6 @@ export function GamesList() {
                     : "Failed to add game.",
             );
         }
-
     };
 
     if (state.stage === "loading") {
@@ -339,18 +335,25 @@ export function GamesList() {
                                             </p>
                                         )}
                                     </div>
-                                    {user && (
-                                        <button
-                                            className="create-game-button"
-                                            onClick={() =>
-                                                handleAddGame(
-                                                    game.id,
-                                                )
-                                            }
-                                        >
-                                            Add to Library
-                                        </button>
-                                    )}
+                                    <div className="game-actions">
+                                        {user && (
+                                            <button
+                                                className="create-game-button"
+                                                onClick={() => handleAddGame(game.id)}
+                                            >
+                                                Add to Library
+                                            </button>
+                                        )}
+
+                                        {isUserAdmin && (
+                                            <Link
+                                                className="games-button"
+                                                to={`/games/${game.id}/edit`}
+                                            >
+                                                Edit
+                                            </Link>
+                                        )}
+                                    </div>
                                 </div>
                             ),
                         )}

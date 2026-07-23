@@ -68,15 +68,12 @@ export function Login() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         dispatch({ type: "post" });
-
         try {
             const response = await api.createToken({
                 email: state.email,
                 password: state.password,
             });
-
             await login(response.token);
-
             dispatch({ type: "success" });
             navigate("/", { replace: true });
         } catch (err) {
@@ -96,16 +93,13 @@ export function Login() {
             <div className="auth-card">
                 <div className="auth-header">
                     <h1 className="auth-title">Iniciar Sessão</h1>
-
                     <p className="auth-description">
                         Entra na tua conta para acederes à tua biblioteca, progresso e conquistas.
                     </p>
                 </div>
-
                 <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label htmlFor="email">Endereço de email</label>
-
                         <input
                             id="email"
                             type="email"
@@ -123,10 +117,8 @@ export function Login() {
                             autoComplete="email"
                         />
                     </div>
-
                     <div className="form-group">
                         <label htmlFor="password">Palavra-passe</label>
-
                         <input
                             id="password"
                             type="password"
@@ -144,13 +136,11 @@ export function Login() {
                             autoComplete="current-password"
                         />
                     </div>
-
                     {state.error && (
                         <div className="form-error">
                             {state.error}
                         </div>
                     )}
-
                     <button
                         className="login-button"
                         type="submit"
@@ -161,7 +151,6 @@ export function Login() {
                             : "Entrar"}
                     </button>
                 </form>
-
                 <div className="auth-footer">
                     <span>Ainda não tens conta?</span>
 
