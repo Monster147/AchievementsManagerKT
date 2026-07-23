@@ -15,22 +15,16 @@ import java.net.http.HttpClient
 class RetroAchievements(
     private val client: HttpClient,
 ) {
-    private lateinit var retroCredentials: RetroCredentials
-
-    private lateinit var api: RetroInterface
-
     suspend fun getAchievements(
         config: IntegrationsConfig,
         externalGameId: String,
     ): List<Achievement> {
-        if (!::api.isInitialized) {
-            if (config.RETRO_USERNAME.isNotEmpty() || config.RETRO_API_KEY.isNotEmpty()) {
-                retroCredentials = RetroCredentials(config.RETRO_USERNAME, config.RETRO_API_KEY)
-                api = RetroClient(retroCredentials).api
-            } else {
-                return emptyList()
-            }
+        if (config.RETRO_USERNAME.isBlank() || config.RETRO_API_KEY.isBlank()) {
+            return emptyList()
         }
+
+        val credentials = RetroCredentials(config.RETRO_USERNAME, config.RETRO_API_KEY)
+        val api = RetroClient(credentials).api
 
         val response: NetworkResponse<GetGameExtended.Response, ErrorResponse> =
             api.getGameExtended(
@@ -39,7 +33,7 @@ class RetroAchievements(
 
         if (response is NetworkResponse.Success) {
             val gameExtended: GetGameExtended.Response = response.body
-
+            println("Game extended" + gameExtended.achievements.values)
             val achievements =
                 gameExtended.achievements.values
                     .sortedBy { it.displayOrder }

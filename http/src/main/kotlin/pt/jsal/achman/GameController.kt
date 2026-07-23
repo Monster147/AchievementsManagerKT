@@ -33,6 +33,7 @@ class GameController(
                 input.externalGameId,
                 input.name,
                 input.source,
+                input.cover
             )
 
         return when (result) {
